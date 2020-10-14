@@ -1,0 +1,49 @@
+<html>
+
+<head>
+
+    <!-- Node.js
+    Alternatively, if you demand a more responsive setup and already use nodejs...
+
+    Install http-server by typing npm install -g http-server
+
+    Change into your working directory, where yoursome.html lives
+
+    Start your http server by issuing http-server -c-1
+
+    This spins up a Node.js httpd which serves the files in your directory as static files accessible from http://localhost:8080 
+    https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local
+    -->
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <title>Google Charts</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container p-3 my-3 bg-dark text-white">
+        <h1>BSPCOVER - Efficient Timeseries</h1>
+        <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
+    </div>
+
+    <div class="container">
+        <div id="curve_chart" class="chart"></div>
+    </div>
+    <div class="container">
+        <div id="chart_div" class="chart"></div>
+    </div>
+
+</body>
+
+<html>
