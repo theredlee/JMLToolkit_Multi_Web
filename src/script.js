@@ -1,16 +1,79 @@
+// Load timeseries dataset
+var globalLines;
+
+loadTimeseries();
+
+function loadTimeseries() {
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/src/ItalyPowerDemand0_TEST",
+            dataType: null,
+            success: function (data) { processData(data); }
+        });
+    });
+}
+
+function processData(allText) {
+    var record_num = 25;  // or however many elements there are in each row
+    var allTextLines = allText.split(/\r\n|\n/);
+    var lines = [];
+
+    allTextLines.forEach(element => {
+
+        var entries = element.split(',');
+
+        while (entries.length >= record_num) {
+            var tarr = [];
+            for (var j = 0; j < record_num; j++) {
+                tarr.push(entries.shift());
+            }
+            lines.push(tarr);
+        }
+    });
+    console.log(lines)
+    globalLines = lines;
+}
+
+/*------------------------------------------------------------*/
+
+
 google.charts.load('current', { 'packages': ['corechart'] });
 google.charts.setOnLoadCallback(drawChart);
 
 function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-        ['Year', 'Sales', 'Expenses'],
-        ['2004', 1000, null],
-        ['2005', 1170, 460],
-        ['2006', 660, 1120],
-        ['2007', 1030, 540],
-        ['2008,', 2010, 760],
-        ['2009,', 2350, 460],
-    ]);
+
+    var record_num = 25;  // or however many elements there are in each row
+
+    var arrTest_1 = globalLines[0];
+    var arrTest_2 = globalLines[1];
+    var arr = [];
+
+    for (i = 0; i < record_num; i++) {
+        if(i==0){
+            arr.push(['Year', 'Sales', 'Expenses']);
+        }else{
+            var localArr = [];
+            localArr.push(parseFloat(i));
+            localArr.push(parseFloat(arrTest_1[i]));
+            localArr.push(parseFloat(arrTest_2[i]));
+            arr.push(localArr);
+        }
+        // text += cars[i] + "<br>";
+    }
+
+    var data = google.visualization.arrayToDataTable(
+        // [
+        //     ['Year', 'Sales', 'Expenses'],
+        //     ['2004', 1000, null],
+        //     ['2005', 1170, 460],
+        //     ['2006', 660, 1120],
+        //     ['2007', 1030, 540],
+        //     ['2008,', 2010, 760],
+        //     ['2009,', 2350, 460],
+        // ]
+        arr
+    );
 
     var options = {
         title: 'Company Performance',
@@ -58,39 +121,6 @@ function drawRightY() {
     };
     var materialChart = new google.charts.Bar(document.getElementById('chart_div'));
     materialChart.draw(data, materialOptions);
-}
-
-
-loadTimeseries();
-
-function loadTimeseries() {
-    $(document).ready(function() {
-        $.ajax({
-            type: "GET",
-            url: "/src/ItalyPowerDemand0_TEST",
-            dataType: null,
-            success: function(data) {processData(data);}
-         });
-    });
-}
-
-function processData(allText) {
-    var record_num = 21;  // or however many elements there are in each row
-    var allTextLines = allText.split(/\r\n|\n/);
-    var entries = allTextLines[0].split(',');
-    var lines = [];
-
-    // var headings = entries.splice(0,record_num);
-    while (entries.length>0) {
-        var tarr = [];
-        for (var j=0; j<record_num; j++) {
-            // tarr.push(headings[j]+":"+entries.shift());
-            tarr.push(entries.shift());
-        }
-        lines.push(tarr);
-    }
-    console.log(lines);
-    // alert(lines);
 }
 
 
