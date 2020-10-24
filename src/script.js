@@ -1,11 +1,24 @@
 // Load timeseries dataset
 var globalLinesTimeseries;
+/*
+[
+    [[0], [1, 2, 3, 4, 5, 6 ...]],
+    [[1], [1, 2, 3, 4, 5, 6 ...]],
+    [[0], [1, 2, 3, 4, 5, 6 ...]],
+    ...
+]
+*/
 var globalLinesShapelet;
 var globalShapeletWeight;
 
 loadTimeseries();
 loadShapelet();
 readShapeletWeight();
+
+window.onload = function () {
+    loadList();
+    // updateList(1);
+}
 
 function loadTimeseries() {
     $(document).ready(function () {
@@ -63,7 +76,7 @@ function processData(allText, type) {
             for (var j = 0; j < record_num; j++) {
                 var entry = entries.shift();
 
-                if (entry == null || entry.length == 0){
+                if (entry == null || entry.length == 0) {
                     continue;
                 } else if (j == labelIndex) { // Handling the first lable element
                     lableArr.push(entry);
@@ -74,7 +87,7 @@ function processData(allText, type) {
 
             tarr.push(lableArr);
             tarr.push(valueArr);
-            // Structure of each tarr: [lable, values]
+            // Structure of each tarr: [lable, values] (label: [], values: [])
             lines.push(tarr);
 
         }
@@ -85,8 +98,9 @@ function processData(allText, type) {
         globalLinesTimeseries = lines;
     } else if (type.toLowerCase() == "shapelet") {
         globalLinesShapelet = lines;
-    }else if (type.toLowerCase() == "shapeletweight") {
+    } else if (type.toLowerCase() == "shapeletweight") {
         globalShapeletWeight = lines;
+    } else {
     }
 }
 
@@ -131,10 +145,10 @@ function drawChart() {
     var arrTest_2 = globalLinesShapelet[0][1];
     var record_num;  // how many elements there are in each row
     var arr = [];
-    
+
     if (arrTest_1.length > arrTest_2.length) {
         record_num = arrTest_1.length;
-    }else{
+    } else {
         record_num = arrTest_2.length;
     }
 
@@ -146,7 +160,7 @@ function drawChart() {
     for (i = 0; i < record_num; i++) {
 
         if (i == 0) {
-            arr.push(['Year', 'Sales', 'Expenses']);
+            arr.push(['Time Interval', 'Shapelets', 'Timeseries']);
         }
 
         var localArr = [];
@@ -178,7 +192,72 @@ function drawChart() {
     );
 
     var options = {
-        title: 'Company Performance',
+        title: 'Timeseries Analysis',
+        curveType: 'function',
+        legend: { position: 'bottom' }
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+    chart.draw(data, options);
+}
+
+function updateChart(num1, num2) {
+    const dim = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
+    var arrTest_1 = globalLinesTimeseries[num1][dim];
+    var arrTest_2 = globalLinesShapelet[num2][dim];
+    var record_num;  // how many elements there are in each row
+    var arr = [];
+
+    if (arrTest_1.length > arrTest_2.length) {
+        record_num = arrTest_1.length;
+    } else {
+        record_num = arrTest_2.length;
+    }
+
+    // console.log(globalLinesTimeseries.length);
+    // console.log(globalLinesShapelet.length);
+
+    var shapeletStartPosition = getShortestDistance(globalLinesTimeseries[0][1], globalLinesShapelet[0][1]);
+
+    for (i = 0; i < record_num; i++) {
+
+        if (i == 0) {
+            arr.push(['Time Interval', 'Shapelets', 'Timeseries']);
+        }
+
+        var localArr = [];
+        localArr.push(parseFloat(i));
+        localArr.push(parseFloat(arrTest_1[i]));
+
+        if (i < shapeletStartPosition || i > shapeletStartPosition + arrTest_2.length) {
+            localArr.push(null);
+        } else {
+            localArr.push(parseFloat(arrTest_2[i]));
+        }
+
+        arr.push(localArr);
+
+        // text += cars[i] + "<br>";
+    }
+
+    var data = google.visualization.arrayToDataTable(
+        arr
+    );
+
+    //Tabel:
+    // [
+    //     ['Year', 'Sales', 'Expenses'],
+    //     ['2004', 1000, null],
+    //     ['2005', 1170, 460],
+    //     ['2006', 660, 1120],
+    //     ['2007', 1030, 540],
+    //     ['2008,', 2010, 760],
+    //     ['2009,', 2350, 460],
+    // ]
+
+    var options = {
+        title: 'Timeseries Analysis',
         curveType: 'function',
         legend: { position: 'bottom' }
     };
@@ -202,12 +281,12 @@ function drawRightY() {
         var lable = [];
         var weights;
         lable.push(row[labelIndex]);
-        weights = row.slice(labelIndex+1, row.length);
+        weights = row.slice(labelIndex + 1, row.length);
         myRow.push(lable);
         myRow.push(weights[0]);
         rows.push(myRow);
     });
-    
+
     var arr = [];
     var topK = 10; // default value: top 10
     var record_num = Number.POSITIVE_INFINITY;  // how many elements there are in each row
@@ -217,31 +296,31 @@ function drawRightY() {
         }
     });
 
-    if (record_num<topK) {
+    if (record_num < topK) {
         topK = record_num;
     }
 
     for (var i = topK; i > 0; i--) {
 
         if (i == topK) {
-            arr.push(['City', '2010 Population', '2000 Population']);
+            arr.push(['Weight Ranking', 'Shaplet-Lable-0', 'Shaplet-Lable-1']);
         }
 
         var localArr = [];
         localArr.push(parseFloat(i));
 
         rows.forEach(row => {
-            if (i>row[1].length) {
+            if (i > row[1].length) {
                 localArr.push(null);
             } else {
                 localArr.push(parseFloat(row[1][i]));
-            } 
+            }
         });
 
         arr.push(localArr);
 
         // console.log("localArr: " + localArr);
-        
+
         // text += cars[i] + "<br>";
     }
 
@@ -259,8 +338,8 @@ function drawRightY() {
 
     var materialOptions = {
         chart: {
-            title: 'Population of Largest U.S. Cities',
-            subtitle: 'Based on most recent and previous census data'
+            title: 'Top-K Maximum Shapelets Ranking',
+            subtitle: 'Based on Grace Dataset - 15-points-5-months (Log)'
         },
         hAxis: {
             title: 'Total Population',
@@ -281,6 +360,45 @@ function drawRightY() {
 }
 
 
-// var csv = require('./jquery.csv.js');
+function loadList() {
+
+    const div = document.querySelector('#timeseriesList');
+    var len = globalLinesTimeseries.length;
+
+    for (var i = 0; i < len; i++) {
+        var item = document.createElement("a");
+        item.setAttribute("class", "dropdown-item");
+        item.href = "#";
+        var node = document.createTextNode(String(i)) /*fetching name of the items*/
+        item.appendChild(node);
+        document.getElementById('timeseriesList').appendChild(item);
+    }
+
+    var elements = document.getElementsByClassName('dropdown-item');
+
+    Array.from(elements).forEach((element) => {
+        element.addEventListener('click', (event) => {
+            // alert(`Clicked ${event.target.innerText}!`);
+            updateChart(parseInt(event.target.innerText), 0);
+        });
+    });
+}
+
+function updateList(num) {
+
+    const div = document.querySelector('#timeseriesList');
+    const dim = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
+
+    var len = globalLinesTimeseries[dim][lable].length;
+
+    for (var i = 0; i < len; i++) {
+        var item = document.createElement("a");
+        item.setAttribute("class", "dropdown-item");
+        item.href = "#";
+        var node = document.createTextNode(String(i)) /*fetching name of the items*/
+        item.appendChild(node);
+        document.getElementById('timeseriesList').appendChild(item);
+    }
+}
 
 

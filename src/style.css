@@ -3,11 +3,36 @@
     margin: 0;
 }
 
-.chart
+.lineChart
 {
-    margin: 100px auto;
-    height: 55%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    margin-right: 10px;
+    margin-left: 10px;
+    /* height: 55%; */
     width: 100%;
     /* width: 900px;
     height: 500px; */
+}
+
+.distributionChart
+{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-right: 50px;
+    margin-left: 50px;
+    /* height: 55%; */
+    /* width: 100%; */
+    /* width: 900px;
+    height: 500px; */
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+
+.arrowColor {
+    color: brown;
 }
