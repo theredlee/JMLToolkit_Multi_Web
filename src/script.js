@@ -10,12 +10,16 @@ var globalLinesTimeseries;
 */
 var globalLinesShapelet;
 var globalShapeletWeight;
+var currentLabelLinesTimeseries;
+var currentLabelLinesShapelet;
 
 loadTimeseries();
 loadShapelet();
 readShapeletWeight();
 
 window.onload = function () {
+    updateTimeseries();
+    updateShapelet();
     loadList();
     // updateList(1);
 }
@@ -89,16 +93,18 @@ function processData(allText, type) {
             tarr.push(valueArr);
             // Structure of each tarr: [lable, values] (label: [], values: [])
             lines.push(tarr);
-
         }
     });
     console.log(lines);
 
     if (type.toLowerCase() == "timeseries") {
-        globalLinesTimeseries = lines;
+        var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
+        globalLinesTimeseries = linesTmp;
     } else if (type.toLowerCase() == "shapelet") {
-        globalLinesShapelet = lines;
+        var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
+        globalLinesShapelet = linesTmp;
     } else if (type.toLowerCase() == "shapeletweight") {
+        // No need to be normalized
         globalShapeletWeight = lines;
     } else {
     }
@@ -129,9 +135,55 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
 
     // return distanceMin/((this.aVariables.currentShapelet_.size()-1)*1.0);
     // return distanceMin*1.0;
+    console.log("distanceMin: " + distanceMin + " startPosition: " + startPosition);
     return startPosition;
 }
 
+function updateTimeseries() {
+    var labelIndex = 0;
+    var valuesArrIndex = 1;
+    /*
+    [
+        [[0], [1, 2, 3, 4, 5, 6 ...]],
+        ...
+    ]
+    */
+    var defaultLableSelection = 0;
+
+    currentLabelLinesTimeseries = []; //Empty the array
+
+    globalLinesTimeseries.forEach(aTimeseries => {
+        if (aTimeseries[labelIndex] == defaultLableSelection) {
+            var row = [];
+            row.push(aTimeseries[labelIndex]);
+            row.push(aTimeseries[valuesArrIndex]);
+            currentLabelLinesTimeseries.push(row);
+        }
+    });
+}
+
+function updateShapelet() {
+    var labelIndex = 0;
+    var valuesArrIndex = 1;
+    /*
+    [
+        [[0], [1, 2, 3, 4, 5, 6 ...]],
+        ...
+    ]
+    */
+    var defaultLableSelection = 0;
+
+    currentLabelLinesShapelet = []; //Empty the array
+
+    globalLinesShapelet.forEach(aShapelet => {
+        if (aShapelet[labelIndex] == defaultLableSelection) {
+            var row = [];
+            row.push(aShapelet[labelIndex]);
+            row.push(aShapelet[valuesArrIndex]);
+            currentLabelLinesShapelet.push(row);
+        }
+    });
+}
 
 /*------------------------------------------------------------*/
 
@@ -202,38 +254,38 @@ function drawChart() {
     chart.draw(data, options);
 }
 
-function updateChart(num1, num2) {
-    const dim = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
-    var arrTest_1 = globalLinesTimeseries[num1][dim];
-    var arrTest_2 = globalLinesShapelet[num2][dim];
+function updateChart(lableIndex1, lableIndex2) {
+    const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
+    var timeseries = currentLabelLinesTimeseries[lableIndex1][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
+    var shapelet = currentLabelLinesShapelet[lableIndex2][valueIndex]; // The shapelets in the list all have the same labels, so that using 'currentLabelLinesShapelet'
     var record_num;  // how many elements there are in each row
     var arr = [];
 
-    if (arrTest_1.length > arrTest_2.length) {
-        record_num = arrTest_1.length;
+    if (timeseries.length > shapelet.length) {
+        record_num = timeseries.length;
     } else {
-        record_num = arrTest_2.length;
+        record_num = shapelet.length;
     }
 
     // console.log(globalLinesTimeseries.length);
     // console.log(globalLinesShapelet.length);
 
-    var shapeletStartPosition = getShortestDistance(globalLinesTimeseries[0][1], globalLinesShapelet[0][1]);
+    var shapeletStartPosition = getShortestDistance(timeseries, shapelet);
 
     for (i = 0; i < record_num; i++) {
 
         if (i == 0) {
-            arr.push(['Time Interval', 'Shapelets', 'Timeseries']);
+            arr.push(['Time Interval', 'Timeseries', 'Shapelets']);
         }
 
         var localArr = [];
         localArr.push(parseFloat(i));
-        localArr.push(parseFloat(arrTest_1[i]));
+        localArr.push(parseFloat(timeseries[i]));
 
-        if (i < shapeletStartPosition || i > shapeletStartPosition + arrTest_2.length) {
+        if (i < shapeletStartPosition || i > shapeletStartPosition + shapelet.length) {
             localArr.push(null);
         } else {
-            localArr.push(parseFloat(arrTest_2[i]));
+            localArr.push(parseFloat(shapelet[i]));
         }
 
         arr.push(localArr);
@@ -361,9 +413,10 @@ function drawRightY() {
 
 
 function loadList() {
+    // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
 
     const div = document.querySelector('#timeseriesList');
-    var len = globalLinesTimeseries.length;
+    var len = currentLabelLinesTimeseries.length;
 
     for (var i = 0; i < len; i++) {
         var item = document.createElement("a");
@@ -401,4 +454,72 @@ function updateList(num) {
     }
 }
 
+function formatTransformForZNormalization(lines) {
+    const defaultDataSelection = 0;
+    const defaultLabelIndex = 0;
+    const defaultValuesIndex = 1;
+    
+    var arr = []; // Put all values of each timeseries in an arrs
+    lines.forEach(line => {
+        var values = line[defaultValuesIndex];
+        values.forEach(val => {
+            arr.push(val);
+        });
+    });
 
+    var arrNormalized = zScoreNormalization(arr); // Get z-normalized values
+
+    // Restore all nomarlized values
+
+    var len = lines[0][1].length; // The number of values of the first timeseries(patient) since the length of each timeseries is equal
+    var linesTmp = [];
+    var count = 0;
+
+    lines.forEach(line => {
+        // Only refer to the label of each timeseries
+        var lineTmp = [];
+        var valuesTmp = [];
+        var labelTmp = line[defaultLabelIndex];
+
+        for (var i = count; i < len; i++) { // Each time count 'len' number of values
+            var val = arrNormalized[i];
+            valuesTmp.push(parseInt(val));
+            arrNormalized.shift();
+        }
+        lineTmp.push(labelTmp);
+        lineTmp.push(valuesTmp);
+        linesTmp.push(lineTmp); // Inssert each lineTmp into linesTmp
+    });
+
+    return linesTmp;
+}
+
+function zScoreNormalization(arr) {
+
+    var total = 0;
+
+    for (var i = 0; i < arr.length; i++) {
+        var v = parseFloat(arr[i]);
+        total += v;
+    }
+
+    var mean = total*1.0 / arr.length;
+
+    var total1 = 0;
+
+    for (var i = 0; i < arr.length; i++) {
+        var v1 = Math.pow(parseFloat(arr[i]) - mean, 2);
+        total1 += v1;
+    }
+
+    var SD = Math.sqrt(total1*1.0 / arr.length);
+
+    var arrTmp = [];
+    arr.forEach(val => {
+        var result = (val-mean)/SD;
+        arrTmp.push(result);
+    });
+
+    // console.log(arrTmp);
+    return arrTmp;
+}
