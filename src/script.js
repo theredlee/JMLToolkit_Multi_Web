@@ -12,8 +12,10 @@ var globalLinesShapelet;
 var globalShapeletWeight;
 var currentLabelLinesTimeseries;
 var currentLabelLinesShapelet;
+var labelSet;
 
 /*------------*/
+var currentLabelSelection;
 var currentTimeseriesSelection;
 var currentShapeletSelection;
 
@@ -24,11 +26,13 @@ readShapeletWeight();
 window.onload = function () {
     var defaultLabelSelection = 0;
     var defaultTimeseriesAndShapeletSelection = 0;
+    currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
+    currentShapeletSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentShapeletSelection with defaultTimeseriesAndShapeletSelection 0
+    currentLabelSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentLabelSelection with defaultTimeseriesAndShapeletSelection 0
     updateTimeseries(defaultLabelSelection); // Initialize the currentLabelLinesTimeseries with defaultLabelSelection 0
     updateShapelet(defaultLabelSelection); // Initialize the currentLabelLinesShapelet with defaultLabelSelection 0
     updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
-    currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
-    currentShapeletSelection = defaultTimeseriesAndShapeletSelection; // // Initialize the currentShapeletSelection with defaultTimeseriesAndShapeletSelection 0
+    loadLabelSet();
     loadTimeseriesList();
     loadShapeletList();
     // updateList(1);
@@ -71,6 +75,7 @@ function processData(allText, type) {
     var labelIndex = 0; // The first element of each row is the lable in terms of both timeseries and shapelet
     var allTextLines = allText.split(/\r\n|\n/);
     var lines = [];
+    var labelSetTmp = new Set();
 
     allTextLines.forEach(element => {
 
@@ -94,6 +99,7 @@ function processData(allText, type) {
                     continue;
                 } else if (j == labelIndex) { // Handling the first lable element
                     lableArr.push(entry);
+                    labelSetTmp.add(entry);
                 } else {
                     valueArr.push(entry);
                 }
@@ -106,6 +112,8 @@ function processData(allText, type) {
         }
     });
     // console.log(lines);
+
+    labelSet = labelSetTmp;
 
     if (type.toLowerCase() == "timeseries") {
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
@@ -149,7 +157,7 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
 
     // return distanceMin/((this.aVariables.currentShapelet_.size()-1)*1.0);
     // return distanceMin*1.0;
-    // console.log("distanceMin: " + distanceMin + ", startPosition: " + startPosition);
+    console.log("startPosition: " + startPosition + ", aShapelet.length: " + aShapelet.length);
     // console.log("Distance: " + distanceBetweenST);
     return startPosition;
 }
@@ -180,6 +188,7 @@ function updateTimeseries(labelSelection) {
         }
     });
 
+    console.log("currentLabelLinesTimeseries.length: " + currentLabelLinesTimeseries.length);
 }
 
 function updateShapelet(labelSelection) {
@@ -213,21 +222,28 @@ google.charts.load('current', { 'packages': ['corechart'] });
 
 function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
+    console.log("currentLabelSelection: " + currentLabelSelection);
+    console.log("noTimeseries: " + noTimeseries);
+    console.log("noShapelet: " + noShapelet);
+    console.log("------------");
+
     const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
     var timeseries = currentLabelLinesTimeseries[noTimeseries][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
     var shapelet = currentLabelLinesShapelet[noShapelet][valueIndex]; // The shapelets in the list all have the same labels, so that using 'currentLabelLinesShapelet'
     var record_num;  // how many elements there are in each row
     var arr = [];
 
-    // console.log("timeseries: " + timeseries);
-    // console.log("shapelet: " + shapelet);
-    // console.log("***********");
+    console.log("timeseries: " + timeseries);
+    console.log("shapelet: " + shapelet);
+    console.log("***********");
 
     if (timeseries.length > shapelet.length) {
         record_num = timeseries.length;
     } else {
         record_num = shapelet.length;
     }
+
+    console.log("record_num: " + record_num);
 
     var shapeletStartPosition = getShortestDistance(timeseries, shapelet);
 
@@ -242,7 +258,7 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
         localArr.push(parseFloat(timeseries[i]));
 
         if (i >= shapeletStartPosition && i <= shapeletStartPosition + shapelet.length) {
-            localArr.push(parseFloat(shapelet[i]));
+            localArr.push(parseFloat(shapelet[i-shapeletStartPosition])); // i-shapeletStartPosition: Always keep consisdent with index of timeseries
         } else {
             localArr.push(null);
         }
@@ -370,11 +386,41 @@ function drawRightY() {
     materialChart.draw(data, materialOptions);
 }
 
+function loadLabelSet() {
+    // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
+
+    var len = labelSet.size;
+
+    for (var i = 0; i < len; i++) {
+        var itemSuper = document.createElement("li");
+        var itemSub = document.createElement("a");
+        var divider = document.createElement("div");
+        itemSub.setAttribute("class", "dropdown-item");
+        itemSub.href = "#";
+        var node = document.createTextNode("Label-" + String(i)) /*fetching name of the items*/
+        divider.setAttribute("class", "dropdown-divider");
+        itemSub.appendChild(node);
+        itemSuper.appendChild(itemSub);
+        document.getElementById('labelList').appendChild(itemSuper);
+        if (i!=(len-1)){
+            document.getElementById('labelList').appendChild(divider);
+        }
+    }
+
+    var elements = document.getElementById('labelList').children;
+
+    Array.from(elements).forEach((element) => {
+        element.addEventListener('click', (event) => {
+            currentLabelSelection = parseInt(event.target.innerText.replace('Label-','')); // Update currentLabelSelection with the clicking item and use it in the next line
+            updateTimeseries(currentLabelSelection);
+            updateShapelet(currentLabelSelection);
+        });
+    });
+}
 
 function loadTimeseriesList() {
     // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
 
-    const div = document.querySelector('#timeseriesList');
     var len = currentLabelLinesTimeseries.length;
 
     for (var i = 0; i < len; i++) {
@@ -401,7 +447,6 @@ function loadTimeseriesList() {
 function loadShapeletList() {
     // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
 
-    const div = document.querySelector('#shapeletList');
     var len = currentLabelLinesShapelet.length;
 
     for (var i = 0; i < len; i++) {
@@ -422,23 +467,6 @@ function loadShapeletList() {
             updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
         });
     });
-}
-
-function updateList(num) {
-
-    const div = document.querySelector('#timeseriesList');
-    const dim = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
-
-    var len = globalLinesTimeseries[dim][lable].length;
-
-    for (var i = 0; i < len; i++) {
-        var item = document.createElement("a");
-        item.setAttribute("class", "dropdown-item");
-        item.href = "#";
-        var node = document.createTextNode(String(i)) /*fetching name of the items*/
-        item.appendChild(node);
-        document.getElementById('timeseriesList').appendChild(item);
-    }
 }
 
 function formatTransformForZNormalization(lines) {

@@ -38,11 +38,20 @@
         <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
     </div>
 
-    
-
     <div class="btn-group">
-        <div class="dropdown">
-            <button class="btn btn-white dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+        <button type="button" class="btn btn-danger">Label</button>
+        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <div id="labelList" class="dropdown-menu">
+        </div>
+    </div>
+
+    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+
+        <div class="btn-group" role="group">
+            <button id="dropdownMenuButton" class="btn dropdown-toggle" type="button" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
                 Timeseries
             </button>
@@ -50,20 +59,21 @@
             </div>
         </div>
 
-        <div class="dropdown">
-            <button class="btn btn-white dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+        <div class="btn-group" role="group">
+            <button id="dropdownMenuButton" class="btn dropdown-toggle" type="button" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
                 Shapelet
             </button>
             <div id="shapeletList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
             </div>
         </div>
+
     </div>
 
     <div class="container">
         <div id="curve_chart" class="lineChart"></div>
     </div>
-    
+
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
