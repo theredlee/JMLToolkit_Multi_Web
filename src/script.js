@@ -13,14 +13,24 @@ var globalShapeletWeight;
 var currentLabelLinesTimeseries;
 var currentLabelLinesShapelet;
 
+/*------------*/
+var currentTimeseriesSelection;
+var currentShapeletSelection;
+
 loadTimeseries();
 loadShapelet();
 readShapeletWeight();
 
 window.onload = function () {
-    updateTimeseries();
-    updateShapelet();
-    loadList();
+    var defaultLabelSelection = 0;
+    var defaultTimeseriesAndShapeletSelection = 0;
+    updateTimeseries(defaultLabelSelection); // Initialize the currentLabelLinesTimeseries with defaultLabelSelection 0
+    updateShapelet(defaultLabelSelection); // Initialize the currentLabelLinesShapelet with defaultLabelSelection 0
+    updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
+    currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
+    currentShapeletSelection = defaultTimeseriesAndShapeletSelection; // // Initialize the currentShapeletSelection with defaultTimeseriesAndShapeletSelection 0
+    loadTimeseriesList();
+    loadShapeletList();
     // updateList(1);
 }
 
@@ -95,14 +105,16 @@ function processData(allText, type) {
             lines.push(tarr);
         }
     });
-    console.log(lines);
+    // console.log(lines);
 
     if (type.toLowerCase() == "timeseries") {
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
         globalLinesTimeseries = linesTmp;
+        // globalLinesTimeseries = lines;
     } else if (type.toLowerCase() == "shapelet") {
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
         globalLinesShapelet = linesTmp;
+        // globalLinesShapelet = lines;
     } else if (type.toLowerCase() == "shapeletweight") {
         // No need to be normalized
         globalShapeletWeight = lines;
@@ -120,9 +132,11 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
         distanceBetweenST = 0;
         for (var j = 0; j < aShapelet.length; j++) { // j=1 -> discard first label
             // index in indexthis.aVariables.currentShapelet
-            distanceBetweenST += Math.pow(aTimeseries[j + i] - aShapelet[j], 2.0);
+            distanceBetweenST += Math.pow(aTimeseries[i + j] - aShapelet[j], 2.0);
         }
         distanceBetweenST = Math.sqrt(distanceBetweenST);
+
+        // console.log("Distance: " + distanceBetweenST);
 
         //System.out.println("distanceBetweenST "+distanceBetweenST);
         if (distanceBetweenST < distanceMin) {
@@ -135,11 +149,12 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
 
     // return distanceMin/((this.aVariables.currentShapelet_.size()-1)*1.0);
     // return distanceMin*1.0;
-    console.log("distanceMin: " + distanceMin + " startPosition: " + startPosition);
+    // console.log("distanceMin: " + distanceMin + ", startPosition: " + startPosition);
+    // console.log("Distance: " + distanceBetweenST);
     return startPosition;
 }
 
-function updateTimeseries() {
+function updateTimeseries(labelSelection) {
     var labelIndex = 0;
     var valuesArrIndex = 1;
     /*
@@ -148,21 +163,26 @@ function updateTimeseries() {
         ...
     ]
     */
-    var defaultLableSelection = 0;
+    // var defaultLabelSelection = 0;
 
     currentLabelLinesTimeseries = []; //Empty the array
 
     globalLinesTimeseries.forEach(aTimeseries => {
-        if (aTimeseries[labelIndex] == defaultLableSelection) {
+        if (aTimeseries[labelIndex] == labelSelection) {
             var row = [];
-            row.push(aTimeseries[labelIndex]);
-            row.push(aTimeseries[valuesArrIndex]);
+            var arr1 = aTimeseries[labelIndex];
+            var arr2 = aTimeseries[valuesArrIndex];
+            // console.log("arr1[0]: " + arr1[0]);
+            // console.log("arr2[1]: " + arr2[1]);
+            row.push(arr1);
+            row.push(arr2);
             currentLabelLinesTimeseries.push(row);
         }
     });
+
 }
 
-function updateShapelet() {
+function updateShapelet(labelSelection) {
     var labelIndex = 0;
     var valuesArrIndex = 1;
     /*
@@ -171,12 +191,12 @@ function updateShapelet() {
         ...
     ]
     */
-    var defaultLableSelection = 0;
+    // var defaultLabelSelection = 0;
 
     currentLabelLinesShapelet = []; //Empty the array
 
     globalLinesShapelet.forEach(aShapelet => {
-        if (aShapelet[labelIndex] == defaultLableSelection) {
+        if (aShapelet[labelIndex] == labelSelection) {
             var row = [];
             row.push(aShapelet[labelIndex]);
             row.push(aShapelet[valuesArrIndex]);
@@ -189,86 +209,25 @@ function updateShapelet() {
 
 
 google.charts.load('current', { 'packages': ['corechart'] });
-google.charts.setOnLoadCallback(drawChart);
+// google.charts.setOnLoadCallback(drawChart);
 
-function drawChart() {
-
-    var arrTest_1 = globalLinesTimeseries[0][1];
-    var arrTest_2 = globalLinesShapelet[0][1];
-    var record_num;  // how many elements there are in each row
-    var arr = [];
-
-    if (arrTest_1.length > arrTest_2.length) {
-        record_num = arrTest_1.length;
-    } else {
-        record_num = arrTest_2.length;
-    }
-
-    // console.log(globalLinesTimeseries.length);
-    // console.log(globalLinesShapelet.length);
-
-    var shapeletStartPosition = getShortestDistance(globalLinesTimeseries[0][1], globalLinesShapelet[0][1]);
-
-    for (i = 0; i < record_num; i++) {
-
-        if (i == 0) {
-            arr.push(['Time Interval', 'Shapelets', 'Timeseries']);
-        }
-
-        var localArr = [];
-        localArr.push(parseFloat(i));
-        localArr.push(parseFloat(arrTest_1[i]));
-
-        if (i < shapeletStartPosition || i > shapeletStartPosition + arrTest_2.length) {
-            localArr.push(null);
-        } else {
-            localArr.push(parseFloat(arrTest_2[i]));
-        }
-
-        arr.push(localArr);
-
-        // text += cars[i] + "<br>";
-    }
-
-    var data = google.visualization.arrayToDataTable(
-        // [
-        //     ['Year', 'Sales', 'Expenses'],
-        //     ['2004', 1000, null],
-        //     ['2005', 1170, 460],
-        //     ['2006', 660, 1120],
-        //     ['2007', 1030, 540],
-        //     ['2008,', 2010, 760],
-        //     ['2009,', 2350, 460],
-        // ]
-        arr
-    );
-
-    var options = {
-        title: 'Timeseries Analysis',
-        curveType: 'function',
-        legend: { position: 'bottom' }
-    };
-
-    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-    chart.draw(data, options);
-}
-
-function updateChart(lableIndex1, lableIndex2) {
+function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
+    // console.log("B");
     const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
-    var timeseries = currentLabelLinesTimeseries[lableIndex1][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
-    var shapelet = currentLabelLinesShapelet[lableIndex2][valueIndex]; // The shapelets in the list all have the same labels, so that using 'currentLabelLinesShapelet'
+    var timeseries = currentLabelLinesTimeseries[noTimeseries][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
+    var shapelet = currentLabelLinesShapelet[noShapelet][valueIndex]; // The shapelets in the list all have the same labels, so that using 'currentLabelLinesShapelet'
     var record_num;  // how many elements there are in each row
     var arr = [];
+
+    // console.log("timeseries: " + timeseries);
+    // console.log("shapelet: " + shapelet);
+    // console.log("***********");
 
     if (timeseries.length > shapelet.length) {
         record_num = timeseries.length;
     } else {
         record_num = shapelet.length;
     }
-
-    // console.log(globalLinesTimeseries.length);
-    // console.log(globalLinesShapelet.length);
 
     var shapeletStartPosition = getShortestDistance(timeseries, shapelet);
 
@@ -282,10 +241,10 @@ function updateChart(lableIndex1, lableIndex2) {
         localArr.push(parseFloat(i));
         localArr.push(parseFloat(timeseries[i]));
 
-        if (i < shapeletStartPosition || i > shapeletStartPosition + shapelet.length) {
-            localArr.push(null);
-        } else {
+        if (i >= shapeletStartPosition && i <= shapeletStartPosition + shapelet.length) {
             localArr.push(parseFloat(shapelet[i]));
+        } else {
+            localArr.push(null);
         }
 
         arr.push(localArr);
@@ -412,7 +371,7 @@ function drawRightY() {
 }
 
 
-function loadList() {
+function loadTimeseriesList() {
     // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
 
     const div = document.querySelector('#timeseriesList');
@@ -420,19 +379,47 @@ function loadList() {
 
     for (var i = 0; i < len; i++) {
         var item = document.createElement("a");
-        item.setAttribute("class", "dropdown-item");
+        item.setAttribute("class", "dropdown-item timeseries-item");
         item.href = "#";
         var node = document.createTextNode(String(i)) /*fetching name of the items*/
         item.appendChild(node);
         document.getElementById('timeseriesList').appendChild(item);
     }
 
-    var elements = document.getElementsByClassName('dropdown-item');
+    var elements = document.getElementsByClassName('dropdown-item timeseries-item');
 
     Array.from(elements).forEach((element) => {
         element.addEventListener('click', (event) => {
-            // alert(`Clicked ${event.target.innerText}!`);
-            updateChart(parseInt(event.target.innerText), 0);
+            
+            // console.log("ABC---1");
+            currentTimeseriesSelection = parseInt(event.target.innerText); // Update currentTimeseriesSelection with the clicking item and use it in the next line
+            updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
+        });
+    });
+}
+
+function loadShapeletList() {
+    // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
+
+    const div = document.querySelector('#shapeletList');
+    var len = currentLabelLinesShapelet.length;
+
+    for (var i = 0; i < len; i++) {
+        var item = document.createElement("a");
+        item.setAttribute("class", "dropdown-item shapelet-item");
+        item.href = "#";
+        var node = document.createTextNode(String(i)) /*fetching name of the items*/
+        item.appendChild(node);
+        document.getElementById('shapeletList').appendChild(item);
+    }
+
+    var elements = document.getElementsByClassName('dropdown-item shapelet-item');
+
+    Array.from(elements).forEach((element) => {
+        element.addEventListener('click', (event) => {
+            // console.log("ABC---2");
+            currentShapeletSelection = parseInt(event.target.innerText); // Update currentTimeseriesSelection with the clicking item and use it in the next line
+            updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
         });
     });
 }
@@ -458,7 +445,7 @@ function formatTransformForZNormalization(lines) {
     const defaultDataSelection = 0;
     const defaultLabelIndex = 0;
     const defaultValuesIndex = 1;
-    
+
     var arr = []; // Put all values of each timeseries in an arrs
     lines.forEach(line => {
         var values = line[defaultValuesIndex];
@@ -483,9 +470,12 @@ function formatTransformForZNormalization(lines) {
 
         for (var i = count; i < len; i++) { // Each time count 'len' number of values
             var val = arrNormalized[i];
-            valuesTmp.push(parseInt(val));
+            valuesTmp.push(val);
             arrNormalized.shift();
         }
+
+        // console.log("arrNormalized.length: " + arrNormalized.length);
+
         lineTmp.push(labelTmp);
         lineTmp.push(valuesTmp);
         linesTmp.push(lineTmp); // Inssert each lineTmp into linesTmp
@@ -503,7 +493,7 @@ function zScoreNormalization(arr) {
         total += v;
     }
 
-    var mean = total*1.0 / arr.length;
+    var mean = total * 1.0 / arr.length;
 
     var total1 = 0;
 
@@ -512,11 +502,11 @@ function zScoreNormalization(arr) {
         total1 += v1;
     }
 
-    var SD = Math.sqrt(total1*1.0 / arr.length);
+    var SD = Math.sqrt(total1 * 1.0 / arr.length);
 
     var arrTmp = [];
     arr.forEach(val => {
-        var result = (val-mean)/SD;
+        var result = (val - mean) / SD;
         arrTmp.push(result);
     });
 
