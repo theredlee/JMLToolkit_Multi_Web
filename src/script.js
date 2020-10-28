@@ -19,11 +19,16 @@ var currentLabelSelection;
 var currentTimeseriesSelection;
 var currentShapeletSelection;
 
+/*------------*/
+var distanceAll; // A shapelet to all timeseries with the same label
+
 loadTimeseries();
 loadShapelet();
 readShapeletWeight();
 
 window.onload = function () {
+
+    getAllDistances();
     var defaultLabelSelection = 0;
     var defaultTimeseriesAndShapeletSelection = 0;
     currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
@@ -35,7 +40,8 @@ window.onload = function () {
     loadLabelSet();
     loadTimeseriesList();
     loadShapeletList();
-    // updateList(1);
+    var topK = 5;
+    topKCharts(topK);
 }
 
 function loadTimeseries() {
@@ -113,7 +119,11 @@ function processData(allText, type) {
     });
     // console.log(lines);
 
-    labelSet = labelSetTmp;
+    if (typeof labelSet !== 'undefined' && labelSet.size < labelSetTmp.size) { // If normal, the labelSet.size should always equal to labelSetTmp.size after labelSet initialization
+        throw new Error("The label size of timeseries and shapelet are not equal!");
+    } else {
+        labelSet = labelSetTmp; // For intialization
+    }
 
     if (type.toLowerCase() == "timeseries") {
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
@@ -157,9 +167,9 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
 
     // return distanceMin/((this.aVariables.currentShapelet_.size()-1)*1.0);
     // return distanceMin*1.0;
-    console.log("startPosition: " + startPosition + ", aShapelet.length: " + aShapelet.length);
+    // console.log("startPosition: " + startPosition + ", aShapelet.length: " + aShapelet.length);
     // console.log("Distance: " + distanceBetweenST);
-    return startPosition;
+    return [distanceMin, startPosition];
 }
 
 function updateTimeseries(labelSelection) {
@@ -214,6 +224,85 @@ function updateShapelet(labelSelection) {
     });
 }
 
+function getAllDistances() {
+    distanceAll = [];
+    /*
+        [
+            [ // one label's distance
+                [ // for one shaplet
+                    [0], // shapelet no.0
+                    [[0, 1.2], [1, 0,97], [2, 3.2], [3, 5.7] ...] // distance from each pari of shapelet and timeseries
+                ],
+                [ // for another shapelet
+                    [1], // shapelet no.1
+                    [[0, 0.22], [1, 1,97], [2, 1.51], [3, 3.1] ...] // distance from each pari of shapelet and timeseries
+                ]
+                ...
+            ],
+            [ // another label's distance
+                
+            ]
+            ...
+        ]
+    */
+
+    var labelIndex = 0;
+    var valuesIndex = 1;
+    var shapeletCount;
+    var timeseriesCount;
+
+    labelSet.forEach(label => {
+        var shapeletArrSameLabel = [];
+        shapeletCount = 0; // For different labels, recount the shapelet no.
+
+        globalLinesShapelet.forEach(shapelet => {
+            if (shapelet[labelIndex] == label) {
+                var arrForSingleShapelet = [];
+                arrForSingleShapelet.push(shapeletCount); // Embed the no. value of this shapelet
+                shapeletCount++;
+                var distanceArr = []; // Each time for calculate the distances between one shapelet and all timeseries with the same label
+                timeseriesCount = 0; // For different shapelet, recount the timeseries no.
+
+                globalLinesTimeseries.forEach(timeseries => {
+                    if (timeseries[labelIndex] == label) {
+                        var pair = [];
+                        pair.push(timeseriesCount); // Embed the timeseries no.
+                        timeseriesCount++;
+
+                        var distance = getShortestDistance(timeseries[valuesIndex], shapelet[valuesIndex]);
+                        pair.push(distance); // [0, 1.2] ...
+                        distanceArr.push(pair); // [[0, 1.2], [1, 0,97], ...]
+                    }
+                });
+
+                console.log("distanceArr[1][1]: " + distanceArr[1][1]);
+                // Before push it into shapeletArrSameLabel, sort distanceArr ascendingly according to distance
+                var sorted = distanceArr.sort(function (a, b) {
+                    return a[1] - b[1];
+                });
+
+                // console.log("sorted[1][0]: " + sorted[1][0]);
+                // console.log("&&&&&&--");
+
+                arrForSingleShapelet.push(distanceArr); // Embed the distances array
+
+                shapeletArrSameLabel.push(arrForSingleShapelet); // Embed the distances array
+
+                // console.log("shapeletArrSameLabel.lenth: " + shapeletArrSameLabel.length);
+            }
+        });
+
+        // console.log("shapeletArrSameLabel.lenth: " + shapeletArrSameLabel.length);
+        // console.log("&&&&&&&--");
+
+        distanceAll.push(shapeletArrSameLabel); // Embed the shapeletArrSameLabel for when moving to the next label
+    });
+}
+
+function topKTimesries() {
+
+}
+
 /*------------------------------------------------------------*/
 
 
@@ -233,9 +322,9 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
     var record_num;  // how many elements there are in each row
     var arr = [];
 
-    console.log("timeseries: " + timeseries);
-    console.log("shapelet: " + shapelet);
-    console.log("***********");
+    // console.log("timeseries: " + timeseries);
+    // console.log("shapelet: " + shapelet);
+    // console.log("***********");
 
     if (timeseries.length > shapelet.length) {
         record_num = timeseries.length;
@@ -243,9 +332,9 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
         record_num = shapelet.length;
     }
 
-    console.log("record_num: " + record_num);
+    // console.log("record_num: " + record_num);
 
-    var shapeletStartPosition = getShortestDistance(timeseries, shapelet);
+    var shapeletStartPosition = getShortestDistance(timeseries, shapelet)[1]; // return [distanceMin, startPosition];
 
     for (i = 0; i < record_num; i++) {
 
@@ -258,7 +347,7 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
         localArr.push(parseFloat(timeseries[i]));
 
         if (i >= shapeletStartPosition && i <= shapeletStartPosition + shapelet.length) {
-            localArr.push(parseFloat(shapelet[i-shapeletStartPosition])); // i-shapeletStartPosition: Always keep consisdent with index of timeseries
+            localArr.push(parseFloat(shapelet[i - shapeletStartPosition])); // i-shapeletStartPosition: Always keep consisdent with index of timeseries
         } else {
             localArr.push(null);
         }
@@ -293,7 +382,6 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
 
     chart.draw(data, options);
 }
-
 
 google.charts.load('current', { packages: ['corechart', 'bar'] });
 google.charts.setOnLoadCallback(drawRightY);
@@ -402,7 +490,7 @@ function loadLabelSet() {
         itemSub.appendChild(node);
         itemSuper.appendChild(itemSub);
         document.getElementById('labelList').appendChild(itemSuper);
-        if (i!=(len-1)){
+        if (i != (len - 1)) {
             document.getElementById('labelList').appendChild(divider);
         }
     }
@@ -411,7 +499,7 @@ function loadLabelSet() {
 
     Array.from(elements).forEach((element) => {
         element.addEventListener('click', (event) => {
-            currentLabelSelection = parseInt(event.target.innerText.replace('Label-','')); // Update currentLabelSelection with the clicking item and use it in the next line
+            currentLabelSelection = parseInt(event.target.innerText.replace('Label-', '')); // Update currentLabelSelection with the clicking item and use it in the next line
             updateTimeseries(currentLabelSelection);
             updateShapelet(currentLabelSelection);
         });
@@ -436,7 +524,7 @@ function loadTimeseriesList() {
 
     Array.from(elements).forEach((element) => {
         element.addEventListener('click', (event) => {
-            
+
             // console.log("ABC---1");
             currentTimeseriesSelection = parseInt(event.target.innerText); // Update currentTimeseriesSelection with the clicking item and use it in the next line
             updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
@@ -540,4 +628,175 @@ function zScoreNormalization(arr) {
 
     // console.log(arrTmp);
     return arrTmp;
+}
+
+function topKCharts(topK) {
+    var start = 0;
+
+    var item1 = document.createElement("ol");
+    item1.setAttribute("class", "carousel-indicators");
+
+    var item2 = document.createElement("div");
+    item2.setAttribute("class", "carousel-inner");
+
+    var item3a = document.createElement("a");
+    item3a.setAttribute("class", "carousel-control-prev");
+    item3a.href = "#carouselTopKChartsIndicators";
+    item3a.setAttribute("role", "button");
+    item3a.setAttribute("data-slide", "prev");
+    var subItem3ai = document.createElement("span");
+    subItem3ai.setAttribute("class", "carousel-control-prev-icon");
+    subItem3ai.setAttribute("aria-hidden", "false");
+    var subItem3aii = document.createElement("span");
+    subItem3aii.setAttribute("class", "sr-only");
+    var textSubItem3aii = document.createTextNode("Previous");
+    subItem3aii.appendChild(textSubItem3aii);
+    item3a.appendChild(subItem3ai);
+    item3a.appendChild(subItem3aii);
+
+
+    var item3b = document.createElement("a");
+    item3b.setAttribute("class", "carousel-control-next");
+    item3b.href = "#carouselTopKChartsIndicators";
+    item3b.setAttribute("role", "button");
+    item3b.setAttribute("data-slide", "next");
+    var subItem3bi = document.createElement("span");
+    subItem3bi.setAttribute("class", "carousel-control-next-icon");
+    subItem3bi.setAttribute("aria-hidden", "false");
+    var subItem3bii = document.createElement("span");
+    subItem3bii.setAttribute("class", "sr-only");
+    var textSubItem3bii = document.createTextNode("Next");
+    subItem3bii.appendChild(textSubItem3bii);
+    item3b.appendChild(subItem3bi);
+    item3b.appendChild(subItem3bii);
+
+    // document.getElementById('carouselTopKChartsIndicators').appendChild(item1); // Since it doesn't work (the active term dosen't change)
+    document.getElementById('carouselTopKChartsIndicators').appendChild(item2);
+    document.getElementById('carouselTopKChartsIndicators').appendChild(item3a);
+    document.getElementById('carouselTopKChartsIndicators').appendChild(item3b);
+
+    for (var i = 0; i < topK; i++) {
+        var subItem1 = document.createElement("li");
+        subItem1.setAttribute("data-target", "#carouselTopKChartsIndicators");
+        subItem1.setAttribute("data-slide-to", i);
+        if (i == start) {
+            subItem1.setAttribute("class", "active");
+        }
+
+        // Parent-Child appending
+        item1.appendChild(subItem1);
+
+        var subItem2 = document.createElement("div");
+        if (i == start) {
+            subItem2.setAttribute("class", "carousel-item active");
+        } else {
+            subItem2.setAttribute("class", "carousel-item");
+        }
+
+        var subSubItem2 = document.createElement("div");
+        subSubItem2.setAttribute("class", "container");
+        var subSubSubItem2 = document.createElement("div");
+        var idName = "topKChart_" + i;
+        subSubSubItem2.setAttribute("id", idName);
+        subSubSubItem2.setAttribute("class", "lineChart");
+        // Parent-Child appending
+        subSubItem2.appendChild(subSubSubItem2);
+        // var subSubItem2 = document.createElement("img");
+        // subSubItem2.setAttribute("src", "./images/b44e708bef1568a61a506283bd57bb10.jpeg");
+        // subSubItem2.setAttribute("class", "d-block w-100");
+        // subSubItem2.setAttribute("alt", "...");
+        subItem2.appendChild(subSubItem2);
+        item2.appendChild(subItem2);
+
+        // Find the shapelet first
+        // Then find the top5 minimum distances
+
+        // distanceAll's structure
+        /*
+        [
+            [ // one label's distance
+                [ // for one shaplet
+                    [0], // shapelet no.0
+                    [[9, 1.2], [2, 0,97], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
+                ],
+                [ // for another shapelet
+                    [1], // shapelet no.1
+                    [[3, 0.22], [1, 1,97], [5, 1.51], [2, 3.1] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
+                ]
+                ...
+            ],
+            [ // another label's distance
+                
+            ]
+            ...
+        ]
+        */
+
+        var underConditionDistanceArr = distanceAll[currentLabelSelection][currentShapeletSelection];
+
+
+        // var topKTimeseriesNoArr = [];
+        var timeseriesIndex = 1; // According to distanceAll's structure
+        var timeseriesNumIndex = 0; // According to distanceAll's structure
+        for (var i = 0; i < topK; i++) {
+            var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
+            console.log("numOfTimeseries: " + numOfTimeseries);
+            updateTopKCharts(numOfTimeseries, currentShapeletSelection, currentLabelSelection, idName); // Create a chart
+        }
+    }
+}
+
+function updateTopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
+    // console.log("B");
+
+    const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
+    var timeseries = currentLabelLinesTimeseries[noTimeseries][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
+    var shapelet = currentLabelLinesShapelet[noShapelet][valueIndex]; // The shapelets in the list all have the same labels, so that using 'currentLabelLinesShapelet'
+    var record_num;  // how many elements there are in each row
+    var arr = [];
+
+    if (timeseries.length > shapelet.length) {
+        record_num = timeseries.length;
+    } else {
+        record_num = shapelet.length;
+    }
+
+    var shapeletStartPosition = getShortestDistance(timeseries, shapelet)[1]; // [distanceMin, startPosition];
+
+    for (i = 0; i < record_num; i++) {
+
+        if (i == 0) {
+            arr.push(['Time Interval', 'Timeseries', 'Shapelets']);
+        }
+
+        var localArr = [];
+        localArr.push(parseFloat(i));
+        localArr.push(parseFloat(timeseries[i]));
+
+        if (i >= shapeletStartPosition && i <= shapeletStartPosition + shapelet.length) {
+            localArr.push(parseFloat(shapelet[i - shapeletStartPosition])); // i-shapeletStartPosition: Always keep consisdent with index of timeseries
+        } else {
+            localArr.push(null);
+        }
+
+        arr.push(localArr);
+
+        // text += cars[i] + "<br>";
+    }
+
+    var data = google.visualization.arrayToDataTable(
+        arr
+    );
+
+    var options = {
+        title: 'Distance between Timeseries no.' + noTimeseries + ' Shapelet no.' + noShapelet + ' Label-' + currentlabel,
+        curveType: 'function',
+        legend: { position: 'bottom' },
+    };
+
+    // console.log("ABC");
+
+    var chart = new google.visualization.LineChart(document.getElementById(chartId));
+
+    chart.draw(data, options);
 }
