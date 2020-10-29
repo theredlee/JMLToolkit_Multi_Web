@@ -275,13 +275,12 @@ function getAllDistances() {
                     }
                 });
 
-                console.log("distanceArr[1][1]: " + distanceArr[1][1]);
-                // Before push it into shapeletArrSameLabel, sort distanceArr ascendingly according to distance
-                var sorted = distanceArr.sort(function (a, b) {
-                    return a[1] - b[1];
-                });
+                // console.log("distanceArr[1][0]: " + distanceArr[1][0]);
 
-                // console.log("sorted[1][0]: " + sorted[1][0]);
+                // Before push it into shapeletArrSameLabel, sort distanceArr ascendingly according to distance
+                distanceArr.sort((a, b) => (a[1] > b[1]) ? 1 : -1)
+
+                // console.log("distanceArr[1][0]: " + distanceArr[1][0]);
                 // console.log("&&&&&&--");
 
                 arrForSingleShapelet.push(distanceArr); // Embed the distances array
@@ -734,19 +733,17 @@ function topKCharts(topK) {
 
         var underConditionDistanceArr = distanceAll[currentLabelSelection][currentShapeletSelection];
 
-
         // var topKTimeseriesNoArr = [];
         var timeseriesIndex = 1; // According to distanceAll's structure
         var timeseriesNumIndex = 0; // According to distanceAll's structure
-        for (var i = 0; i < topK; i++) {
-            var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
-            console.log("numOfTimeseries: " + numOfTimeseries);
-            updateTopKCharts(numOfTimeseries, currentShapeletSelection, currentLabelSelection, idName); // Create a chart
-        }
+
+        var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
+        console.log("numOfTimeseries: " + numOfTimeseries + ", currentShapeletSelection: " + currentShapeletSelection + ", currentLabelSelection: " + currentLabelSelection);
+        createATopKCharts(numOfTimeseries, currentShapeletSelection, currentLabelSelection, idName); // Create a chart
     }
 }
 
-function updateTopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
+function createATopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
 
     const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
@@ -789,7 +786,7 @@ function updateTopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // 
     );
 
     var options = {
-        title: 'Distance between Timeseries no.' + noTimeseries + ' Shapelet no.' + noShapelet + ' Label-' + currentlabel,
+        title: 'Distance between timeseries no.' + noTimeseries + ', shapelet no.' + noShapelet + ', Label no.' + currentlabel,
         curveType: 'function',
         legend: { position: 'bottom' },
     };
