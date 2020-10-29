@@ -21,6 +21,7 @@ var currentShapeletSelection;
 
 /*------------*/
 var distanceAll; // A shapelet to all timeseries with the same label
+const topK = 5; // Initialize the topK = 5
 
 loadTimeseries();
 loadShapelet();
@@ -40,8 +41,7 @@ window.onload = function () {
     loadLabelSet();
     loadTimeseriesList();
     loadShapeletList();
-    var topK = 5;
-    topKCharts(topK);
+    topKCharts(currentShapeletSelection, currentLabelSelection, topK);
 }
 
 function loadTimeseries() {
@@ -501,6 +501,7 @@ function loadLabelSet() {
             currentLabelSelection = parseInt(event.target.innerText.replace('Label-', '')); // Update currentLabelSelection with the clicking item and use it in the next line
             updateTimeseries(currentLabelSelection);
             updateShapelet(currentLabelSelection);
+            updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
         });
     });
 }
@@ -629,7 +630,7 @@ function zScoreNormalization(arr) {
     return arrTmp;
 }
 
-function topKCharts(topK) {
+function topKCharts(shapeletSelection, labelSelection, topK) {
     var start = 0;
 
     var item1 = document.createElement("ol");
@@ -731,19 +732,43 @@ function topKCharts(topK) {
         ]
         */
 
-        var underConditionDistanceArr = distanceAll[currentLabelSelection][currentShapeletSelection];
+        var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
 
         // var topKTimeseriesNoArr = [];
         var timeseriesIndex = 1; // According to distanceAll's structure
         var timeseriesNumIndex = 0; // According to distanceAll's structure
 
         var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
-        console.log("numOfTimeseries: " + numOfTimeseries + ", currentShapeletSelection: " + currentShapeletSelection + ", currentLabelSelection: " + currentLabelSelection);
-        createATopKCharts(numOfTimeseries, currentShapeletSelection, currentLabelSelection, idName); // Create a chart
+        console.log("numOfTimeseries: " + numOfTimeseries + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+        setATopKCharts(numOfTimeseries, shapeletSelection, labelSelection, idName); // Create a chart
     }
 }
 
-function createATopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
+function updateTopKCharts(shapeletSelection, labelSelection, topK) {
+
+    var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
+    var carouselInner = document.getElementById("carouselTopKChartsIndicators").children[secondChildIndex];
+
+    for (var i = 0; i < topK; i++) {
+        var carouselItem = carouselInner.children[i];
+        var firstChildIndex = 0;
+        var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
+        var idName = chartDiv.id;
+        // console.log("idName: " + idName);
+        
+        var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+
+        // var topKTimeseriesNoArr = [];
+        var timeseriesIndex = 1; // According to distanceAll's structure
+        var timeseriesNumIndex = 0; // According to distanceAll's structure
+
+        var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
+        console.log("numOfTimeseries: " + numOfTimeseries + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+        setATopKCharts(numOfTimeseries, shapeletSelection, labelSelection, idName); // Create a chart
+    }
+}
+
+function setATopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
 
     const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
