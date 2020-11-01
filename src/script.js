@@ -23,12 +23,10 @@ var currentShapeletSelection;
 var distanceAll; // A shapelet to all timeseries with the same label
 const topK = 5; // Initialize the topK = 5
 
-loadTimeseries();
-loadShapelet();
-readShapeletWeight();
+// Asynchronous call before onload
+asynchronousCall();
 
 window.onload = function () {
-
     getAllDistances();
     var defaultLabelSelection = 0;
     var defaultTimeseriesAndShapeletSelection = 0;
@@ -42,7 +40,20 @@ window.onload = function () {
     loadTimeseriesList();
     loadShapeletList();
     topKCharts(currentShapeletSelection, currentLabelSelection, topK);
+    drawHistogram();
 }
+
+google.charts.load('current', { packages: ['corechart', 'bar'] });
+// google.load('visualization', '1.0', { 'packages': ['corechart'], 'callback': drawCharts });
+
+function asynchronousCall() {
+    // Asynchronous
+    readShapeletWeight();
+    loadTimeseries();
+    loadShapelet();
+}
+
+/*----------------------------------------*/
 
 function loadTimeseries() {
     $(document).ready(function () {
@@ -134,8 +145,43 @@ function processData(allText, type) {
         globalLinesShapelet = linesTmp;
         // globalLinesShapelet = lines;
     } else if (type.toLowerCase() == "shapeletweight") {
+        // Assign a no. column to this dataset
+
+        /*
+        [
+        [[0], [0], [1, 2, 3, 4, 5, 6 ...]],
+        [[1], [1], [1, 2, 3, 4, 5, 6 ...]],
+        [[2], [0], [1, 2, 3, 4, 5, 6 ...]],
+        [[3], [0], [1, 2, 3, 4, 5, 6 ...]],
+        ...
+        ]
+        */
+
+        var newLines = [];
+        lines.forEach(line => {
+            var lineCount = 0;
+            var labelIndex = 0;
+            var valuesIndex = 1;
+            var startIndex = 1;
+            var label = line[labelIndex];
+            var newLine = [];
+            var newValues = [];
+            var values = line[valuesIndex];
+            for (var i = startIndex; i < values.length; i++) {
+                var weight = values[i];
+                var arr = [lineCount, weight];
+                lineCount++;
+                newValues.push(arr);
+            }
+            newValues.sort((a, b) => (parseFloat(a[1]) < parseFloat(b[1])) ? 1 : -1); // Sort the pairs (descending)
+            newLine.push([label]);
+            newLine.push(newValues);
+            newLines.push(newLine);
+            // console.log("newLine: " + newLine);
+        });
+
         // No need to be normalized
-        globalShapeletWeight = lines;
+        globalShapeletWeight = newLines;
     } else {
     }
 }
@@ -278,7 +324,7 @@ function getAllDistances() {
                 // console.log("distanceArr[1][0]: " + distanceArr[1][0]);
 
                 // Before push it into shapeletArrSameLabel, sort distanceArr ascendingly according to distance
-                distanceArr.sort((a, b) => (a[1] > b[1]) ? 1 : -1)
+                distanceArr.sort((a, b) => (parseFloat(a[1]) > parseFloat(b[1])) ? 1 : -1);
 
                 // console.log("distanceArr[1][0]: " + distanceArr[1][0]);
                 // console.log("&&&&&&--");
@@ -303,10 +349,6 @@ function topKTimesries() {
 }
 
 /*------------------------------------------------------------*/
-
-
-google.charts.load('current', { 'packages': ['corechart'] });
-// google.charts.setOnLoadCallback(drawChart);
 
 function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
@@ -382,30 +424,105 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
     chart.draw(data, options);
 }
 
-google.charts.load('current', { packages: ['corechart', 'bar'] });
-google.charts.setOnLoadCallback(drawRightY);
+// google.charts.load('current', { packages: ['corechart', 'bar'] });
+// google.charts.setOnLoadCallback(drawHistogram);
 
-function drawRightY() {
+function carouselChart(carouseId, numberOfChart, chartClassName, chartIdName) {
+    var herf = "#" + carouseId;
+    // var item1 = document.createElement("ol");
+    // item1.setAttribute("class", "carousel-indicators"); // The carousel-indicators created by js doesn't work, so hardcode them in html
+
+    var item2 = document.createElement("div");
+    item2.setAttribute("class", "carousel-inner");
+
+    var item3a = document.createElement("a");
+    item3a.setAttribute("class", "carousel-control-prev");
+    item3a.href = herf;
+    item3a.setAttribute("role", "button");
+    item3a.setAttribute("data-slide", "prev");
+    var subItem3ai = document.createElement("span");
+    subItem3ai.setAttribute("class", "carousel-control-prev-icon");
+    subItem3ai.setAttribute("aria-hidden", "false");
+    var subItem3aii = document.createElement("span");
+    subItem3aii.setAttribute("class", "sr-only");
+    var textSubItem3aii = document.createTextNode("Previous");
+    subItem3aii.appendChild(textSubItem3aii);
+    item3a.appendChild(subItem3ai);
+    item3a.appendChild(subItem3aii);
+
+    var item3b = document.createElement("a");
+    item3b.setAttribute("class", "carousel-control-next");
+    item3b.href = herf;
+    item3b.setAttribute("role", "button");
+    item3b.setAttribute("data-slide", "next");
+    var subItem3bi = document.createElement("span");
+    subItem3bi.setAttribute("class", "carousel-control-next-icon");
+    subItem3bi.setAttribute("aria-hidden", "false");
+    var subItem3bii = document.createElement("span");
+    subItem3bii.setAttribute("class", "sr-only");
+    var textSubItem3bii = document.createTextNode("Next");
+    subItem3bii.appendChild(textSubItem3bii);
+    item3b.appendChild(subItem3bi);
+    item3b.appendChild(subItem3bii);
+
+    // document.getElementById('carouselTopKChartsIndicators').appendChild(item1); // Since it doesn't work (the active term dosen't change)
+    document.getElementById(carouseId).appendChild(item2);
+    document.getElementById(carouseId).appendChild(item3a);
+    document.getElementById(carouseId).appendChild(item3b);
+    /*-----------------*/
+
+    var start = 0;
+    for (var i = 0; i < numberOfChart; i++) {
+        var idName = chartIdName + "_" + i;
+        // var subItem1 = document.createElement("li");
+        // subItem1.setAttribute("data-target", "#carouselTopKChartsIndicators");
+        // subItem1.setAttribute("data-slide-to", i);
+        // if (i == start) {
+        //     subItem1.setAttribute("class", "active");
+        // }
+
+        // // Parent-Child appending
+        // item1.appendChild(subItem1);
+
+        var subItem2 = document.createElement("div");
+        if (i == start) {
+            subItem2.setAttribute("class", "carousel-item active");
+        } else {
+            subItem2.setAttribute("class", "carousel-item");
+        }
+
+        var subSubItem2 = document.createElement("div");
+        subSubItem2.setAttribute("class", "container");
+        var subSubSubItem2 = document.createElement("div");
+        subSubSubItem2.setAttribute("id", idName);
+        subSubSubItem2.setAttribute("class", chartClassName);
+        // Parent-Child appending
+        subSubItem2.appendChild(subSubSubItem2);
+        // var subSubItem2 = document.createElement("img");
+        // subSubItem2.setAttribute("src", "./images/b44e708bef1568a61a506283bd57bb10.jpeg");
+        // subSubItem2.setAttribute("class", "d-block w-100");
+        // subSubItem2.setAttribute("alt", "...");
+        subItem2.appendChild(subSubItem2);
+        item2.appendChild(subItem2);
+    }
+}
+
+function drawHistogram() {
+    var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
+    var numberOfChart = 2;
+    var chartClassName = "distributionChart"; // Class name has to follow the Google Chart Documentation
+    var chartIdName = "distributionChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
+
+    carouselChart(carouseId, numberOfChart, chartClassName, chartIdName);
 
     var labelIndex = 0;
-    var rows = [];
+    var valuesIndex = 1;
 
-    globalShapeletWeight.forEach(row => {
-        var myRow = [];
-        var lable = [];
-        var weights;
-        lable.push(row[labelIndex]);
-        weights = row.slice(labelIndex + 1, row.length);
-        myRow.push(lable);
-        myRow.push(weights[0]);
-        rows.push(myRow);
-    });
-
-    var arr = [];
     var topK = 10; // default value: top 10
     var record_num = Number.POSITIVE_INFINITY;  // how many elements there are in each row
-    rows.forEach(row => {
-        if (row[1].length < record_num) {
+
+    globalShapeletWeight.forEach(row => {
+        if (row[valuesIndex].length < record_num) {
             record_num = row[1].length;
         }
     });
@@ -414,63 +531,97 @@ function drawRightY() {
         topK = record_num;
     }
 
-    for (var i = topK; i > 0; i--) {
+    var numberOfChartCount = 0; // Count number of charts according to the rows
+    globalShapeletWeight.forEach(row => {
 
-        if (i == topK) {
-            arr.push(['Weight Ranking', 'Shaplet-Lable-0', 'Shaplet-Lable-1']);
-        }
+        var arr = [];
+        var labelArr = ['Weight Ranking'];
+        var label = row[labelIndex];
+        labelArr.push('(Shapelet) ' + label);
+        console.log("labelArr: " + labelArr);
+        arr.push(labelArr); // Insert the legend for histogram
 
-        var localArr = [];
-        localArr.push(parseFloat(i));
+        for (var i = topK - 1; i >= 0; i--) { // Since the index is from 0 -> top K
 
-        rows.forEach(row => {
+            var localArr = [];
+
+            // var tag = "";
+            // globalShapeletWeight.forEach(row => {
+            //     var weightNoShapelet = 0;
+            //     var label = row[labelIndex];
+            //     tag += 'Lable ' + label + ", no." + row[valuesIndex][i][weightNoShapelet] + "\n"; // Make a customized tag
+            // });
+
+            // localArr.push(tag); // Insert the tag
+
+            localArr.push(i);
+
+            // console.log("row.length: " + row.length);
+            var weightValueIndex = 1;
             if (i > row[1].length) {
                 localArr.push(null);
             } else {
-                localArr.push(parseFloat(row[1][i]));
+                localArr.push(parseFloat(row[valuesIndex][i][weightValueIndex]));
             }
-        });
 
-        arr.push(localArr);
-
-        // console.log("localArr: " + localArr);
-
-        // text += cars[i] + "<br>";
-    }
-
-    var data = google.visualization.arrayToDataTable(
-        // [
-        // ['City', '2010 Population', '2000 Population'],
-        // ['New York City, NY', 8175000, 8008000],
-        // ['Los Angeles, CA', 3792000, 3694000],
-        // ['Chicago, IL', 2695000, 2896000],
-        // ['Houston, TX', 2099000, 1953000],
-        // ['Philadelphia, PA', 1526000, 1517000] 
-        // ]
-        arr
-    );
-
-    var materialOptions = {
-        chart: {
-            title: 'Top-K Maximum Shapelets Ranking',
-            subtitle: 'Based on Grace Dataset - 15-points-5-months (Log)'
-        },
-        hAxis: {
-            title: 'Total Population',
-            minValue: 0,
-        },
-        vAxis: {
-            title: 'City'
-        },
-        bars: 'horizontal',
-        axes: {
-            y: {
-                0: { side: 'right' }
-            }
+            arr.push(localArr); // Each time push one row (one label)
         }
-    };
-    var materialChart = new google.charts.Bar(document.getElementById('chart_div'));
-    materialChart.draw(data, materialOptions);
+
+        console.log("arr: " + arr);
+
+        /*------------*/
+
+        var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
+        var carouselInner = document.getElementById(carouseId).children[secondChildIndex];
+
+
+        var carouselItem = carouselInner.children[numberOfChartCount];
+        var firstChildIndex = 0;
+        var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
+        var idName = chartDiv.id;
+        // console.log("idName: " + idName);
+
+        // Create a chart
+        // Dataset format:
+        /*
+            [
+                ['City', '2010 Population', '2000 Population'],
+                ['New York City, NY', 8175000, 8008000],
+                ['Los Angeles, CA', 3792000, 3694000],
+                ['Chicago, IL', 2695000, 2896000],
+                ['Houston, TX', 2099000, 1953000],
+                ['Philadelphia, PA', 1526000, 1517000] 
+            ]
+        */
+
+        var data = google.visualization.arrayToDataTable(
+            arr
+        );
+
+        var materialOptions = {
+            chart: {
+                // title: 'Top-K Maximum Shapelets Ranking',
+                subtitle: 'Weight - Based on Grace Dataset - 15-points-5-months (Log)',
+            },
+            hAxis: {
+                title: 'Weight',
+                minValue: 0,
+            },
+            vAxis: {
+                title: 'Value'
+            },
+            bars: 'horizontal',
+            axes: {
+                y: {
+                    0: { side: 'right' }
+                }
+            }
+        };
+        var materialChart = new google.charts.Bar(document.getElementById(idName));
+        materialChart.draw(data, materialOptions);
+
+        numberOfChartCount++;
+    });
 }
 
 function loadLabelSet() {
@@ -654,7 +805,6 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
     item3a.appendChild(subItem3ai);
     item3a.appendChild(subItem3aii);
 
-
     var item3b = document.createElement("a");
     item3b.setAttribute("class", "carousel-control-next");
     item3b.href = "#carouselTopKChartsIndicators";
@@ -755,7 +905,7 @@ function updateTopKCharts(shapeletSelection, labelSelection, topK) {
         var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
         var idName = chartDiv.id;
         // console.log("idName: " + idName);
-        
+
         var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
 
         // var topKTimeseriesNoArr = [];
