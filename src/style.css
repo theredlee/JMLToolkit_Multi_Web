@@ -49,3 +49,7 @@
   .carousel-indicators .active {
     background-color: #444;
   }
+
+  .carouselHistogramIndicators{
+/* Only for carouselHistogramIndicators */
+  }
