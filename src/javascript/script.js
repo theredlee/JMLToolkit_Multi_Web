@@ -1,4 +1,4 @@
-// https://stackoverflow.com/questions/7971615/difference-between-pageload-onload-document-ready#:~:text=The%20ready%20event%20occurs%20after,event%20is%20specific%20to%20jQuery.&text=I%20know%20HTML%20document%20load%20means%20all%20page%20element%20load%20complete.
+// Difference between pageLoad , onload & $(document).ready(): https://stackoverflow.com/questions/7971615/difference-between-pageload-onload-document-ready#:~:text=The%20ready%20event%20occurs%20after,event%20is%20specific%20to%20jQuery.&text=I%20know%20HTML%20document%20load%20means%20all%20page%20element%20load%20complete.
 
 // Load timeseries dataset
 var globalLinesTimeseries;
@@ -27,6 +27,15 @@ const topK = 5; // Initialize the topK = 5
 
 // Asynchronous call before onload
 
+// The ready event occurs after the HTML document has been loaded, =>
+$(document).ready(function() {
+    // Asynchronous
+    readShapeletWeight();
+    loadTimeseries();
+    loadShapelet();
+});
+
+// while the onload event occurs later, when all content (e.g. images) also has been loaded.
 window.onload = function () {
     var defaultLabelSelection = 0;
     var defaultTimeseriesAndShapeletSelection = 0;
@@ -44,9 +53,22 @@ window.onload = function () {
     var numberOfChart = 2;
     var chartClassName = "distributionChart"; // Class name has to follow the Google Chart Documentation
     var chartIdName = "distributionChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
-    carouselChart(carouseId, numberOfChart, chartClassName, chartIdName);
+    carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName);
 
-    /* ----- */
+    // Add event handlers for label, timeseries, shapelet selections
+    addEventHandlers();
+}
+
+function addEventHandlers() {
+    $('#labelBtnGroup > button').on("click", function() {
+        newValue = $(this).text(); 
+        currentLabelSelection = parseInt(parseInt(newValue));
+        // alert(currentLabelSelection)
+        updateTimeseries(currentLabelSelection);
+        updateShapelet(currentLabelSelection);
+        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
+    });
+    
     $("#timeseriesSelectionInput").on("change", function (event) {
         newValue = $(this).val()
         currentTimeseriesSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
@@ -73,19 +95,8 @@ window.onload = function () {
      });
 }
 
-$(document).ready(function() {
-    asynchronousCall();
-});
-
 google.charts.load('current', { packages: ['corechart', 'bar'] });
 // google.load('visualization', '1.0', { 'packages': ['corechart'], 'callback': drawCharts });
-
-function asynchronousCall() {
-    // Asynchronous
-    readShapeletWeight();
-    loadTimeseries();
-    loadShapelet();
-}
 
 /*----------------------------------------*/
 
@@ -454,7 +465,7 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
 // google.charts.load('current', { packages: ['corechart', 'bar'] });
 // google.charts.setOnLoadCallback(drawHistogram);
 
-function carouselChart(carouseId, numberOfChart, chartClassName, chartIdName) {
+function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName) {
     var herf = "#" + carouseId;
     // var item1 = document.createElement("ol");
     // item1.setAttribute("class", "carousel-indicators"); // The carousel-indicators created by js doesn't work, so hardcode them in html
@@ -542,11 +553,11 @@ function carouselChart(carouseId, numberOfChart, chartClassName, chartIdName) {
     // For rendering update
     $('#carouselHistogramIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
         if (allRenderedCount<1) {
-        var currentIndex = $('div.active.carouselHistogramIndicators').index();
-        var currentNodeChildren = $('div.active.carouselHistogramIndicators').children();
-        var firstChildId = currentNodeChildren[0].firstChild.id;
-        // console.log(currentIndex + '/2');
-        console.log("currentNodeId: " + firstChildId);
+            var currentIndex = $('div.active.carouselHistogramIndicators').index();
+            var currentNodeChildren = $('div.active.carouselHistogramIndicators').children();
+            var firstChildId = currentNodeChildren[0].firstChild.id;
+            // console.log(currentIndex + '/2');
+            console.log("currentNodeIdHistogram: " + firstChildId);
 
             // Render the chart when the slide has occured and compeleted rendering
             drawHistogram(currentIndex);
@@ -614,7 +625,6 @@ function drawHistogram(numOfIndex) {
     var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
     var carouselInner = document.getElementById(carouseId).children[secondChildIndex];
 
-
     var carouselItem = carouselInner.children[numOfIndex];
     var firstChildIndex = 0;
     var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
@@ -681,15 +691,6 @@ function loadLabelSet() {
         item.appendChild(node);
         document.getElementById('labelBtnGroup').appendChild(item);
     }
-
-    $('#labelBtnGroup > button').on("click", function() {
-        newValue = $(this).text(); 
-        currentLabelSelection = parseInt(parseInt(newValue));
-        // alert(currentLabelSelection)
-        updateTimeseries(currentLabelSelection);
-        updateShapelet(currentLabelSelection);
-        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
-    });
 }
 
 function formatTransformForZNormalization(lines) {
@@ -822,23 +823,14 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
 
         var subItem2 = document.createElement("div");
         if (i == start) {
-            subItem2.setAttribute("class", "carousel-item active");
+            subItem2.setAttribute("class", "carouselTopKChartsIndicators carousel-item active");
         } else {
-            subItem2.setAttribute("class", "carousel-item");
+            subItem2.setAttribute("class", "carouselTopKChartsIndicators carousel-item");
         }
 
         var subSubItem2 = document.createElement("div");
         subSubItem2.setAttribute("class", "container");
-        var subSubSubItem2 = document.createElement("div");
-        var idName = "topKChart_" + i;
-        subSubSubItem2.setAttribute("id", idName);
-        subSubSubItem2.setAttribute("class", "lineChart");
-        // Parent-Child appending
-        subSubItem2.appendChild(subSubSubItem2);
-        // var subSubItem2 = document.createElement("img");
-        // subSubItem2.setAttribute("src", "./images/b44e708bef1568a61a506283bd57bb10.jpeg");
-        // subSubItem2.setAttribute("class", "d-block w-100");
-        // subSubItem2.setAttribute("alt", "...");
+        subSubItem2.setAttribute("id", "topKChartContainer_" + i);
         subItem2.appendChild(subSubItem2);
         item2.appendChild(subItem2);
 
@@ -851,7 +843,7 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
             [ // one label's distance
                 [ // for one shaplet
                     [0], // shapelet no.0
-                    [[9, 1.2], [2, 0,97], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
+                    [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
                 ],
                 [ // for another shapelet
                     [1], // shapelet no.1
@@ -865,45 +857,75 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
             ...
         ]
         */
-
-        var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
-
-        // var topKTimeseriesNoArr = [];
-        var timeseriesIndex = 1; // According to distanceAll's structure
-        var timeseriesNumIndex = 0; // According to distanceAll's structure
-
-        var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
-        console.log("numOfTimeseries: " + numOfTimeseries + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-        setATopKCharts(numOfTimeseries, shapeletSelection, labelSelection, idName); // Create a chart
     }
+
+    var firstMinimunDistanceIndex = 0;
+    var initialChartId = 0 // initialID = 0
+    var timeseriesIndex = 1; // According to distanceAll's structure
+    var timeseriesNumIndex = 0; // According to distanceAll's structure
+    var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+    var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
+    console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+    setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
+
+    var allRenderedCount = 0; // After all slides rendered, stop update
+
+    // For rendering update
+    $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
+        if (allRenderedCount<topK-1) {
+            var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
+            // console.log("currentIdIndexTopK: " + currentIdIndex);
+            // -------------------------------------------------------------------------------
+            var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][currentIdIndex][timeseriesNumIndex];
+            console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+            setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, currentIdIndex); // Create a chart
+            allRenderedCount++;
+            // -------------------------------------------------------------------------------
+        }
+    });
 }
 
 function updateTopKCharts(shapeletSelection, labelSelection, topK) {
 
-    var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
-    var carouselInner = document.getElementById("carouselTopKChartsIndicators").children[secondChildIndex];
+    var firstMinimunDistanceIndex = 0;
+    var initialChartId = 0 // initialID = 0
+    var timeseriesIndex = 1; // According to distanceAll's structure
+    var timeseriesNumIndex = 0; // According to distanceAll's structure
+    var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+    var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
+    console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+    setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
 
-    for (var i = 0; i < topK; i++) {
-        var carouselItem = carouselInner.children[i];
-        var firstChildIndex = 0;
-        var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
-        var idName = chartDiv.id;
-        // console.log("idName: " + idName);
+    var allRenderedCount = 0; // After all slides rendered, stop update
 
-        var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
-
-        // var topKTimeseriesNoArr = [];
-        var timeseriesIndex = 1; // According to distanceAll's structure
-        var timeseriesNumIndex = 0; // According to distanceAll's structure
-
-        var numOfTimeseries = underConditionDistanceArr[timeseriesIndex][i][timeseriesNumIndex];
-        console.log("numOfTimeseries: " + numOfTimeseries + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-        setATopKCharts(numOfTimeseries, shapeletSelection, labelSelection, idName); // Create a chart
-    }
+    // For rendering update
+    $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
+        if (allRenderedCount<topK-1) {
+            var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
+            // console.log("currentIdIndexTopK: " + currentIdIndex);
+            // -------------------------------------------------------------------------------
+            var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][currentIdIndex][timeseriesNumIndex];
+            console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
+            setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, currentIdIndex); // Create a chart
+            allRenderedCount++;
+            // -------------------------------------------------------------------------------
+        }
+    });
 }
 
-function setATopKCharts(noTimeseries, noShapelet, currentlabel, chartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
+function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
+    // ------------------------------------------
+    // Retirve to the DOM structure in function topKCharts()
+    var subSubItem2 = document.getElementById('topKChartContainer_'+aChartId);
+    var subSubSubItem2 = document.createElement("div");
+    var chartId = "topKChart_" + aChartId;
+    subSubSubItem2.setAttribute("id", chartId);
+    subSubSubItem2.setAttribute("class", "lineChart");
+    // Parent-Child appending
+    subSubItem2.appendChild(subSubSubItem2);
+
+    // ------------------------------------------
 
     const valueIndex = 1; // The 0 dimension is lable data, the 1 dimension is timeseries data
     var timeseries = currentLabelLinesTimeseries[noTimeseries][valueIndex]; // The timeseries in the list all have the same labels, so that using 'currentLabelLinesTimeseries'
