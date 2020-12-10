@@ -628,10 +628,10 @@ function drawHistogram(numOfIndex) {
             subtitle: 'Weight - Based on Grace Dataset - 15-points-5-months (Log)',
         },
         chartArea: { width: '90%' },
-        hAxis: {
-            title: 'Weight',
-            minValue: 0,
-        },
+        // hAxis: {
+        //     title: 'Weight',
+        //     minValue: 0,
+        // },
         vAxis: {
             title: 'Value'
         },
@@ -639,7 +639,10 @@ function drawHistogram(numOfIndex) {
         axes: {
             y: {
                 0: { side: 'right' }
-            }
+            },
+            x: {
+                0: { side: 'top', label: 'Weight'} // Top x-axis.
+              }
         }
     };
     var materialChart = new google.charts.Bar(document.getElementById(idName));
