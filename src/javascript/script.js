@@ -1,3 +1,5 @@
+// https://stackoverflow.com/questions/7971615/difference-between-pageload-onload-document-ready#:~:text=The%20ready%20event%20occurs%20after,event%20is%20specific%20to%20jQuery.&text=I%20know%20HTML%20document%20load%20means%20all%20page%20element%20load%20complete.
+
 // Load timeseries dataset
 var globalLinesTimeseries;
 /*
@@ -24,10 +26,8 @@ var distanceAll; // A shapelet to all timeseries with the same label
 const topK = 5; // Initialize the topK = 5
 
 // Asynchronous call before onload
-asynchronousCall();
 
 window.onload = function () {
-    getAllDistances();
     var defaultLabelSelection = 0;
     var defaultTimeseriesAndShapeletSelection = 0;
     currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
@@ -37,21 +37,45 @@ window.onload = function () {
     updateShapelet(defaultLabelSelection); // Initialize the currentLabelLinesShapelet with defaultLabelSelection 0
     updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
     loadLabelSet();
-    loadTimeseriesList();
-    loadShapeletList();
+    getAllDistances();
     topKCharts(currentShapeletSelection, currentLabelSelection, topK);
 
     var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
     var numberOfChart = 2;
     var chartClassName = "distributionChart"; // Class name has to follow the Google Chart Documentation
     var chartIdName = "distributionChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
-
     carouselChart(carouseId, numberOfChart, chartClassName, chartIdName);
 
-    // histogramCarousel();
+    /* ----- */
+    $("#timeseriesSelectionInput").on("change", function (event) {
+        newValue = $(this).val()
+        currentTimeseriesSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
+    })
 
-    // test();
+    $("#shapeletSelectionInput").on("change", function (event) {
+        newValue = $(this).val()
+        currentShapeletSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
+    })
+
+    var maxLenTimeseries = currentLabelLinesTimeseries.length - 1;
+    var maxLenShapelet = currentLabelLinesShapelet.length - 1;
+    var minLen = 0
+    $("#timeseriesSelectionInput").attr({
+        "max": maxLenTimeseries,        // substitute your own
+        "min": minLen          // values (or variables) here
+     });
+     
+    $("#shapeletSelectionInput").attr({
+        "max": maxLenShapelet,        // substitute your own
+        "min": minLen          // values (or variables) here
+     });
 }
+
+$(document).ready(function() {
+    asynchronousCall();
+});
 
 google.charts.load('current', { packages: ['corechart', 'bar'] });
 // google.load('visualization', '1.0', { 'packages': ['corechart'], 'callback': drawCharts });
@@ -218,13 +242,6 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
             startPosition = i;
         }
     }
-    // System.out.println("From drawShapeletTrace_centerChart() -> startPoint: " + startPosition);
-    // this.aVariables.globalStartPosition = startPosition;
-
-    // return distanceMin/((this.aVariables.currentShapelet_.size()-1)*1.0);
-    // return distanceMin*1.0;
-    // console.log("startPosition: " + startPosition + ", aShapelet.length: " + aShapelet.length);
-    // console.log("Distance: " + distanceBetweenST);
     return [distanceMin, startPosition];
 }
 
@@ -654,82 +671,24 @@ function loadLabelSet() {
 
     var len = labelSet.size;
 
-    for (var i = 0; i < len; i++) {
-        var itemSuper = document.createElement("li");
-        var itemSub = document.createElement("a");
-        var divider = document.createElement("div");
-        itemSub.setAttribute("class", "dropdown-item");
-        itemSub.href = "#";
-        var node = document.createTextNode("Label-" + String(i)) /*fetching name of the items*/
-        divider.setAttribute("class", "dropdown-divider");
-        itemSub.appendChild(node);
-        itemSuper.appendChild(itemSub);
-        document.getElementById('labelList').appendChild(itemSuper);
-        if (i != (len - 1)) {
-            document.getElementById('labelList').appendChild(divider);
-        }
-    }
-
-    var elements = document.getElementById('labelList').children;
-
-    Array.from(elements).forEach((element) => {
-        element.addEventListener('click', (event) => {
-            currentLabelSelection = parseInt(event.target.innerText.replace('Label-', '')); // Update currentLabelSelection with the clicking item and use it in the next line
-            updateTimeseries(currentLabelSelection);
-            updateShapelet(currentLabelSelection);
-            updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
-        });
-    });
-}
-
-function loadTimeseriesList() {
-    // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
-
-    var len = currentLabelLinesTimeseries.length;
+    // console.log('len: ' + len);
 
     for (var i = 0; i < len; i++) {
-        var item = document.createElement("a");
-        item.setAttribute("class", "dropdown-item timeseries-item");
-        item.href = "#";
-        var node = document.createTextNode(String(i)) /*fetching name of the items*/
+        var item = document.createElement("button");
+        item.setAttribute("class", "btn btn-secondary");
+        item.type = "button";
+        var node = document.createTextNode(i); /*fetching name of the items*/
         item.appendChild(node);
-        document.getElementById('timeseriesList').appendChild(item);
+        document.getElementById('labelBtnGroup').appendChild(item);
     }
 
-    var elements = document.getElementsByClassName('dropdown-item timeseries-item');
-
-    Array.from(elements).forEach((element) => {
-        element.addEventListener('click', (event) => {
-
-            // console.log("ABC---1");
-            currentTimeseriesSelection = parseInt(event.target.innerText); // Update currentTimeseriesSelection with the clicking item and use it in the next line
-            updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
-        });
-    });
-}
-
-function loadShapeletList() {
-    // List always contains the timeseries with the same labels, so that using 'currentLabelLinesTimeseries'
-
-    var len = currentLabelLinesShapelet.length;
-
-    for (var i = 0; i < len; i++) {
-        var item = document.createElement("a");
-        item.setAttribute("class", "dropdown-item shapelet-item");
-        item.href = "#";
-        var node = document.createTextNode(String(i)) /*fetching name of the items*/
-        item.appendChild(node);
-        document.getElementById('shapeletList').appendChild(item);
-    }
-
-    var elements = document.getElementsByClassName('dropdown-item shapelet-item');
-
-    Array.from(elements).forEach((element) => {
-        element.addEventListener('click', (event) => {
-            // console.log("ABC---2");
-            currentShapeletSelection = parseInt(event.target.innerText); // Update currentTimeseriesSelection with the clicking item and use it in the next line
-            updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
-        });
+    $('#labelBtnGroup > button').on("click", function() {
+        newValue = $(this).text(); 
+        currentLabelSelection = parseInt(parseInt(newValue));
+        // alert(currentLabelSelection)
+        updateTimeseries(currentLabelSelection);
+        updateShapelet(currentLabelSelection);
+        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     });
 }
 

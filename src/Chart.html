@@ -34,8 +34,13 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/bmap.min.js"></script>
     <script type="text/javascript" src="./javascript/script.js"></script>
     <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js" integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+        integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"
+        integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg=="
+        crossorigin="anonymous"></script>
+
 </head>
 
 <body>
@@ -44,7 +49,7 @@
         <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
     </div>
 
-    <div class="btn-group">
+    <!-- <div class="btn-group">
         <button type="button" class="btn btn-danger">Label</button>
         <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
@@ -52,29 +57,33 @@
         </button>
         <div id="labelList" class="dropdown-menu">
         </div>
+    </div> -->
+
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <div id="labelBtnGroup" class="btn-group mr-2" role="group" aria-label="First group">
+        </div>
     </div>
+
 
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
 
-        <div class="btn-group" role="group">
-            <button id="dropdownMenuButton" class="btn dropdown-toggle" type="button" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                Timeseries
-            </button>
-            <div id="timeseriesList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
-            </div>
+        <div id="timeseriesList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
         </div>
+        <!-- </div> -->
 
-        <div class="btn-group" role="group">
-            <!-- <button id="dropdownMenuButton" class="btn dropdown-toggle" type="button" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                Shapelet
-            </button> -->
-            <div id="shapeletList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
-            </div>
+        <input id="timeseriesSelectionInput" type="number" value="4" min="0" max="9" step="1" data-decimals="0"
+            data-prefix="timeseries: " />
+        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
+
+    </div>
+
+    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+        <div id="shapeletList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
         </div>
-        
-        <input type="number" value="4.5" min="0" max="9" step="0.1" data-decimals="2" data-suffix="°C"/>
+        <!-- </div> -->
+
+        <input id="shapeletSelectionInput" type="number" value="4" min="0" max="9" step="1" data-decimals="0"
+            data-prefix="shapelet: " />
         <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
@@ -82,6 +91,7 @@
         <script>
             $("input[type='number']").inputSpinner();
         </script>
+        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
     </div>
 
 
