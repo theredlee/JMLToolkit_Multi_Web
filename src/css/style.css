@@ -15,6 +15,12 @@
     height: 500px; */
 }
 
+#top_x_div
+{
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
 .distributionChart
 {
     margin-top: 30px;
@@ -52,4 +58,14 @@
 
   .carouselHistogramIndicators{
 /* Only for carouselHistogramIndicators */
+  }
+  
+  .chart--container {
+    min-height: 200px;
+    width: 100%;
+    height: 50%;
+  }
+
+  .zc-ref {
+    display: none;
   }

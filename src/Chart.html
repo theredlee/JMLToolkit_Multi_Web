@@ -9,7 +9,9 @@
 
     Change into your working directory, where yoursome.html lives
 
-    Start your http server by issuing http-server -c-1
+    Start your http server by issuing:
+    
+    http-server -c-1
 
     This spins up a Node.js httpd which serves the files in your directory as static files accessible from http://localhost:8080 
     https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local
@@ -32,8 +34,11 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="./javascript/script.js"></script>
     <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
         integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
         crossorigin="anonymous"></script>
@@ -49,38 +54,19 @@
         <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
     </div>
 
-    <!-- <div class="btn-group">
-        <button type="button" class="btn btn-danger">Label</button>
-        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
-            <span class="sr-only">Toggle Dropdown</span>
-        </button>
-        <div id="labelList" class="dropdown-menu">
-        </div>
-    </div> -->
-
-    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-        <div id="labelBtnGroup" class="btn-group mr-2" role="group" aria-label="First group">
-        </div>
+    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+        <input id="labelSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
+            data-prefix="class: " />
+        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
     </div>
 
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-
-        <div id="timeseriesList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
-        </div>
-        <!-- </div> -->
-
-        <input id="timeseriesSelectionInput" type="number" value="4" min="0" max="9" step="1" data-decimals="0"
+        <input id="timeseriesSelectionInput" type="number" value="2" min="0" step="1" data-decimals="0"
             data-prefix="timeseries: " />
         <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
-
     </div>
 
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-        <div id="shapeletList" class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuButton">
-        </div>
-        <!-- </div> -->
-
         <input id="shapeletSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
             data-prefix="shapelet: " />
         <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -93,12 +79,9 @@
         <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
     </div>
 
+    <div id="curve_chart" class="lineChart"></div>
 
-    <div class="container">
-        <div id="curve_chart" class="lineChart"></div>
-    </div>
-
-    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <!-- <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
             <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
@@ -123,7 +106,7 @@
             <span class="carousel-control-next-icon" aria-hidden="false"></span>
             <span class="sr-only">Next</span>
         </a>
-    </div>
+    </div> -->
 
     <div id="carouselTopKChartsIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
@@ -135,16 +118,11 @@
         </ol>
     </div>
 
-    <div id="carouselHistogramIndicators" class="carousel slide" data-ride="carousel">
-        <ol class="carousel-indicators">
-            <li data-target="#carouselHistogramIndicators" data-slide-to="0" class="active"></li>
-            <li data-target="#carouselHistogramIndicators" data-slide-to="1"></li>
-        </ol>
-    </div>
-
-    <!-- <div class="container">
-        <div id="chart_div" class="distributionChart"></div>
-    </div> -->
+    <!-- <div id="columnChart"></div> -->
+    <!-- <div id="top_x_div"></div> -->
+    <div id="myChart" class="chart--container">
+        <a class="zc-ref" href="https://www.zingchart.com/">Powered by ZingChart</a>
+      </div>
 
 </body>
 
