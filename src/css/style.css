@@ -15,12 +15,6 @@
     height: 500px; */
 }
 
-#top_x_div
-{
-    margin-right: 10px;
-    margin-left: 10px;
-}
-
 .scrollable-menu {
     height: auto;
     max-height: 200px;
@@ -47,6 +41,10 @@
   .carouselHistogramIndicators{
 /* Only for carouselHistogramIndicators */
   }
+
+  /* .container {
+    padding: 0%;
+  }  */
   
   .chart--container {
     min-height: 200px;
@@ -61,3 +59,7 @@
   /* .couraselInnerText {
     margin-left: 10px;
   } */
+  
+  .btn-group {
+    width: 100%;
+  }

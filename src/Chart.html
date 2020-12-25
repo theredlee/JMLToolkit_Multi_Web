@@ -49,37 +49,39 @@
 </head>
 
 <body>
-    <div class="container p-3 my-3 bg-dark text-white">
-        <h1>BSPCOVER - Efficient Timeseries</h1>
-        <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
+    <div class="container p-3 my-3 bg-dark text-white" style="padding: 0%;">
+        <h2>BSPCOVER - Efficient Timeseries</h2>
+        <p>Research Project: <i>Visualet: Visualizing Shapelets for Time Series Classification</i></p>
     </div>
 
-    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-        <input id="labelSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
-            data-prefix="class: " />
-        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
+    <div class="container justify-content-center">
+        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+            <input id="labelSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
+                data-prefix="&nbsp &nbsp class: &nbsp &nbsp "/>
+            <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
+        </div>
+    
+        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+            <input id="timeseriesSelectionInput" type="number" value="2" min="0" step="1" data-decimals="0"
+                data-prefix="timeseries: " />
+            <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
+        </div>
+    
+        <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+            <input id="shapeletSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
+                data-prefix="&nbsp  shapelet: " />
+            <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+            <script src="./javascript/bootstrap-input-spinner.js"></script>
+            <script>
+                $("input[type='number']").inputSpinner();
+            </script>
+            <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
+        </div>
     </div>
 
-    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-        <input id="timeseriesSelectionInput" type="number" value="2" min="0" step="1" data-decimals="0"
-            data-prefix="timeseries: " />
-        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
-    </div>
-
-    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-        <input id="shapeletSelectionInput" type="number" value="0" min="0" step="1" data-decimals="0"
-            data-prefix="shapelet: " />
-        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        <script src="./javascript/bootstrap-input-spinner.js"></script>
-        <script>
-            $("input[type='number']").inputSpinner();
-        </script>
-        <!-- Spinner documentation: https://github.com/shaack/bootstrap-input-spinner & https://shaack.com/projekte/bootstrap-input-spinner/ -->
-    </div>
-
-    <div id="curve_chart" class="lineChart"></div>
+    <div id="curve_chart" class="lineChart justify-content-center"></div>
 
     <!-- <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
@@ -108,12 +110,7 @@
         </a>
     </div> -->
 
-    <div class="container p-8 my-3 bg-dark text-white">
-        <h4>Weights</h4>
-        <p>This container has a dark background color and a white text, and some extra padding and margins.</p>
-    </div>
-
-    <div id="carouselTopKChartsIndicators" class="carousel slide" data-ride="carousel">
+    <div id="carouselTopKChartsIndicators" class="carousel slide bg-dark" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carouselTopKChartsIndicators" data-slide-to="0" class="active"></li>
             <li data-target="#carouselTopKChartsIndicators" data-slide-to="1"></li>
@@ -123,10 +120,10 @@
         </ol>
     </div>
 
-    <div id="carouseldashboardBarChartIndicators" class="carousel slide bg-dark" data-ride="carousel">
+    <div id="carouselDashboardBarChartIndicators" class="carousel slide bg-dark" data-ride="carousel">
         <ol class="carousel-indicators">
-            <li data-target="#carouseldashboardBarChartIndicators" data-slide-to="0" class="active"></li>
-            <li data-target="#carouseldashboardBarChartIndicators" data-slide-to="1"></li>
+            <li data-target="#carouselDashboardBarChartIndicators" data-slide-to="0" class="active"></li>
+            <li data-target="#carouselDashboardBarChartIndicators" data-slide-to="1"></li>
         </ol>
     </div>
 

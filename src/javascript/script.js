@@ -48,11 +48,11 @@ window.onload = function () {
     getAllDistances();
     topKCharts(currentShapeletSelection, currentLabelSelection, topK);
 
-    var carouseId = "carouseldashboardBarChartIndicators"; // Ensure that you have the same <div id="carouseldashboardBarChartIndicators" ... ></div> in html
+    var carouseId = "carouselDashboardBarChartIndicators"; // Ensure that you have the same <div id="carouselDashboardBarChartIndicators" ... ></div> in html
     var numberOfChart = 2;
     var chartClassName = "chart--container"; // Class name has to follow the Google Chart Documentation
     var chartIdName = "dashboardBarChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
-    carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName);
+    carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName, chartIdName);
 
     // Add event handlers for label, timeseries, shapelet selections
     addEventHandlers();
@@ -387,10 +387,6 @@ function getAllDistances() {
     });
 }
 
-function topKTimesries() {
-
-}
-
 /*------------------------------------------------------------*/
 function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
@@ -601,9 +597,22 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
             subItem2.setAttribute("class", "carouselTopKChartsIndicators carousel-item");
         }
 
+        var subSubItem3 = document.createElement("div");
+        var subSubSubItem3i = document.createElement("h5");
+        var subSubSubItem3ii = document.createElement("p");
+        var distanceDescriptionArr = ['1st', '2nd', '3rd', '4th', '5th'];
+        subSubItem3.className = "container p-8 my-3 bg-dark text-white";
+        // subSubSubItem3i.innerHTML = "The " + distanceDescriptionArr[i] + " shortest distance";
+        subSubSubItem3i.innerHTML = "The Shortest Distance Pair: " + (i+1);
+        subSubSubItem3ii.innerHTML = "The smaller the distance between shapelet and timeseries, the higher the similarity between them.";
+        subSubItem3.appendChild(subSubSubItem3i);
+        subSubItem3.appendChild(subSubSubItem3ii);
+
         var subSubItem2 = document.createElement("div");
-        subSubItem2.setAttribute("class", "container");
+        subSubItem2.setAttribute("class", "container justify-content-center");
         subSubItem2.setAttribute("id", "topKChartContainer_" + i);
+        subSubItem2.setAttribute("style", "padding-right: 10%;");
+        subItem2.appendChild(subSubItem3);
         subItem2.appendChild(subSubItem2);
         item2.appendChild(subItem2);
 
@@ -659,7 +668,6 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
 }
 
 function updateTopKCharts(shapeletSelection, labelSelection, topK) {
-
     var firstMinimunDistanceIndex = 0;
     var initialChartId = 0 // initialID = 0
     var timeseriesIndex = 1; // According to distanceAll's structure
@@ -748,7 +756,6 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     // console.log("ABC");
 
     var chart = new google.visualization.LineChart(document.getElementById(chartId));
-
     chart.draw(data, options);
 }
 
@@ -757,7 +764,7 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
 
 function test() { }
 
-function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName) {
+function carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName, chartIdName) {
     var herf = "#" + carouseId;
     // var item1 = document.createElement("ol");
     // item1.setAttribute("class", "carousel-indicators"); // The carousel-indicators created by js doesn't work, so hardcode them in html
@@ -807,18 +814,18 @@ function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartI
 
         var subItem2 = document.createElement("div");
         if (i == start) {
-            subItem2.setAttribute("class", "carouseldashboardBarChartIndicators carousel-item active");
+            subItem2.setAttribute("class", "carouselDashboardBarChartIndicators carousel-item active");
         } else {
-            subItem2.setAttribute("class", "carouseldashboardBarChartIndicators carousel-item");
+            subItem2.setAttribute("class", "carouselDashboardBarChartIndicators carousel-item");
         }
 
         var subSubItem2 = document.createElement("div");
         var subSubItem3 = document.createElement("div");
-        var subSubSubItem3i = document.createElement("h4");
+        var subSubSubItem3i = document.createElement("h5");
         var subSubSubItem3ii = document.createElement("p");
         subSubItem3.className = "container p-8 my-3 bg-dark text-white";
-        subSubSubItem3i.innerHTML = "Shapelet class: " + i;
-        subSubSubItem3ii.innerHTML = "This container has a dark background color and a white text, and some extra padding and margins.";
+        subSubSubItem3i.innerHTML = "Shapelet Class: " + i;
+        subSubSubItem3ii.innerHTML = "Shapelet Weight: the greater the shapelet weight, the more it timeseries small distance.";
         subSubItem3.appendChild(subSubSubItem3i);
         subSubItem3.appendChild(subSubSubItem3ii);
 
@@ -837,10 +844,10 @@ function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartI
     var allRenderedCount = 0; // After all slides rendered, stop update
 
     // For rendering update
-    $('#carouseldashboardBarChartIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
+    $('#carouselDashboardBarChartIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
         if (allRenderedCount < 1) {
-            var currentIndex = $('div.active.carouseldashboardBarChartIndicators').index();
-            var currentNodeChildren = $('div.active.carouseldashboardBarChartIndicators').children();
+            var currentIndex = $('div.active.carouselDashboardBarChartIndicators').index();
+            var currentNodeChildren = $('div.active.carouselDashboardBarChartIndicators').children();
             var firstChildId = currentNodeChildren[0].id;
             // console.log(currentIndex + '/2');
             console.log("currentNodeIdHistogram: " + firstChildId);
@@ -858,7 +865,7 @@ function drawDashboardBarChart(numOfIndex) {
     console.log("numOfIndex:");
     console.log(numOfIndex);
 
-    var carouseId = "carouseldashboardBarChartIndicators"; // Ensure that you have the same <div id="carouseldashboardBarChartIndicators" ... ></div> in html
+    var carouseId = "carouselDashboardBarChartIndicators"; // Ensure that you have the same <div id="carouselDashboardBarChartIndicators" ... ></div> in html
 
     /*------------*/
     var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
