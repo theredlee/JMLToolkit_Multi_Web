@@ -28,7 +28,7 @@ const topK = 5; // Initialize the topK = 5
 // Asynchronous call before onload
 
 // The ready event occurs after the HTML document has been loaded, =>
-$(document).ready(function() {
+$(document).ready(function () {
     // Asynchronous
     readShapeletWeight();
     loadTimeseries();
@@ -47,13 +47,12 @@ window.onload = function () {
     updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
     getAllDistances();
     topKCharts(currentShapeletSelection, currentLabelSelection, topK);
-    abc();
 
-    var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
+    var carouseId = "carouseldashboardBarChartIndicators"; // Ensure that you have the same <div id="carouseldashboardBarChartIndicators" ... ></div> in html
     var numberOfChart = 2;
-    var chartClassName = "distributionChart"; // Class name has to follow the Google Chart Documentation
-    var chartIdName = "distributionChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
-    // carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName);
+    var chartClassName = "chart--container"; // Class name has to follow the Google Chart Documentation
+    var chartIdName = "dashboardBarChart"; // Id name has no limitation (Here i just use the same same as the 'chartClassName')
+    carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName);
 
     // Add event handlers for label, timeseries, shapelet selections
     addEventHandlers();
@@ -68,7 +67,7 @@ function addEventHandlers() {
         updateShapelet(currentLabelSelection);
         updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     });
-    
+
     $("#timeseriesSelectionInput").on("change", function (event) {
         newValue = $(this).val()
         currentTimeseriesSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
@@ -89,17 +88,17 @@ function addEventHandlers() {
     $("#labelSelectionInput").attr({
         "max": maxLenLabel,        // substitute your own
         "min": minLen          // values (or variables) here
-     });
+    });
 
     $("#timeseriesSelectionInput").attr({
         "max": maxLenTimeseries,        // substitute your own
         "min": minLen          // values (or variables) here
-     });
-     
+    });
+
     $("#shapeletSelectionInput").attr({
         "max": maxLenShapelet,        // substitute your own
         "min": minLen          // values (or variables) here
-     });
+    });
 }
 
 google.charts.load('current', { packages: ['corechart', 'bar'] });
@@ -393,7 +392,6 @@ function topKTimesries() {
 }
 
 /*------------------------------------------------------------*/
-
 function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
     console.log("currentLabelSelection: " + currentLabelSelection);
@@ -466,246 +464,6 @@ function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw
     var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
     chart.draw(data, options);
-}
-
-// google.charts.load('current', { packages: ['corechart', 'bar'] });
-// google.charts.setOnLoadCallback(drawHistogram);
-
-function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName) {
-    var herf = "#" + carouseId;
-    // var item1 = document.createElement("ol");
-    // item1.setAttribute("class", "carousel-indicators"); // The carousel-indicators created by js doesn't work, so hardcode them in html
-
-    var item2 = document.createElement("div");
-    item2.setAttribute("class", "carousel-inner");
-
-    var item3a = document.createElement("a");
-    item3a.setAttribute("class", "carousel-control-prev");
-    item3a.href = herf;
-    item3a.setAttribute("role", "button");
-    item3a.setAttribute("data-slide", "prev");
-    var subItem3ai = document.createElement("span");
-    subItem3ai.setAttribute("class", "carousel-control-prev-icon");
-    subItem3ai.setAttribute("aria-hidden", "false");
-    var subItem3aii = document.createElement("span");
-    subItem3aii.setAttribute("class", "sr-only");
-    var textSubItem3aii = document.createTextNode("Previous");
-    subItem3aii.appendChild(textSubItem3aii);
-    item3a.appendChild(subItem3ai);
-    item3a.appendChild(subItem3aii);
-
-    var item3b = document.createElement("a");
-    item3b.setAttribute("class", "carousel-control-next");
-    item3b.href = herf;
-    item3b.setAttribute("role", "button");
-    item3b.setAttribute("data-slide", "next");
-    var subItem3bi = document.createElement("span");
-    subItem3bi.setAttribute("class", "carousel-control-next-icon");
-    subItem3bi.setAttribute("aria-hidden", "false");
-    var subItem3bii = document.createElement("span");
-    subItem3bii.setAttribute("class", "sr-only");
-    var textSubItem3bii = document.createTextNode("Next");
-    subItem3bii.appendChild(textSubItem3bii);
-    item3b.appendChild(subItem3bi);
-    item3b.appendChild(subItem3bii);
-
-    // document.getElementById('carouselTopKChartsIndicators').appendChild(item1); // Since it doesn't work (the active term dosen't change)
-    document.getElementById(carouseId).appendChild(item2);
-    document.getElementById(carouseId).appendChild(item3a);
-    document.getElementById(carouseId).appendChild(item3b);
-    /*-----------------*/
-
-    var start = 0;
-    for (var i = 0; i < numberOfChart; i++) {
-        var idName = chartIdName + "_" + i;
-        // var subItem1 = document.createElement("li");
-        // subItem1.setAttribute("data-target", "#carouselTopKChartsIndicators");
-        // subItem1.setAttribute("data-slide-to", i);
-        // if (i == start) {
-        //     subItem1.setAttribute("class", "active");
-        // }
-
-        // // Parent-Child appending
-        // item1.appendChild(subItem1);
-
-        var subItem2 = document.createElement("div");
-        if (i == start) {
-            subItem2.setAttribute("class", "carouselHistogramIndicators carousel-item active");
-        } else {
-            subItem2.setAttribute("class", "carouselHistogramIndicators carousel-item");
-        }
-
-        var subSubItem2 = document.createElement("div");
-        subSubItem2.setAttribute("class", "container");
-        var subSubSubItem2 = document.createElement("div");
-        subSubSubItem2.setAttribute("id", idName);
-        subSubSubItem2.setAttribute("class", chartClassName);
-        // Parent-Child appending
-        subSubItem2.appendChild(subSubSubItem2);
-        // var subSubItem2 = document.createElement("img");
-        // subSubItem2.setAttribute("src", "./images/b44e708bef1568a61a506283bd57bb10.jpeg");
-        // subSubItem2.setAttribute("class", "d-block w-100");
-        // subSubItem2.setAttribute("alt", "...");
-        subItem2.appendChild(subSubItem2);
-        item2.appendChild(subItem2);
-    }
-
-    // Initialize the first active carousel slide in the first chart
-    var initializedIndex = 0;
-    drawHistogram(initializedIndex);
-
-    var allRenderedCount = 0; // After all slides rendered, stop update
-
-    // For rendering update
-    $('#carouselHistogramIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
-        if (allRenderedCount<1) {
-            var currentIndex = $('div.active.carouselHistogramIndicators').index();
-            var currentNodeChildren = $('div.active.carouselHistogramIndicators').children();
-            var firstChildId = currentNodeChildren[0].firstChild.id;
-            // console.log(currentIndex + '/2');
-            console.log("currentNodeIdHistogram: " + firstChildId);
-
-            // Render the chart when the slide has occured and compeleted rendering
-            drawHistogram(currentIndex);
-            allRenderedCount++;
-        }
-    });
-}
-
-function drawHistogram(numOfIndex) {
-    var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
-
-    var labelIndex = 0;
-    var valuesIndex = 1;
-
-    var topK = 10; // default value: top 10
-    var record_num = Number.POSITIVE_INFINITY;  // how many elements there are in each row
-
-    globalShapeletWeight.forEach(row => {
-        if (row[valuesIndex].length < record_num) {
-            record_num = row[1].length;
-        }
-    });
-
-    if (record_num < topK) {
-        topK = record_num;
-    }
-    /*------------------*/
-
-    var row = globalShapeletWeight[numOfIndex];
-    /*------------------*/
-    var arr = [];
-    var labelArr = ['Weight Ranking'];
-    var label = row[labelIndex];
-    labelArr.push('(Shapelet) ' + label);
-    arr.push(labelArr); // Insert the legend for histogram
-
-    for (var i = topK - 1; i >= 0; i--) { // Since the index is from 0 -> top K
-
-        var localArr = [];
-
-        // var tag = "";
-        // globalShapeletWeight.forEach(row => {
-        //     var weightNoShapelet = 0;
-        //     var label = row[labelIndex];
-        //     tag += 'Lable ' + label + ", no." + row[valuesIndex][i][weightNoShapelet] + "\n"; // Make a customized tag
-        // });
-
-        // localArr.push(tag); // Insert the tag
-
-        localArr.push(i);
-
-        // console.log("row.length: " + row.length);
-        var weightValueIndex = 1;
-        if (i > row[1].length) {
-            localArr.push(null);
-        } else {
-            localArr.push(parseFloat(row[valuesIndex][i][weightValueIndex]));
-        }
-
-        arr.push(localArr); // Each time push one row (one label)
-    }
-
-    /*------------*/
-
-    var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
-    var carouselInner = document.getElementById(carouseId).children[secondChildIndex];
-
-    var carouselItem = carouselInner.children[numOfIndex];
-    var firstChildIndex = 0;
-    var chartDiv = carouselItem.children[firstChildIndex].children[firstChildIndex];
-    var idName = chartDiv.id;
-    // console.log("idName: " + idName);
-
-    // Create a chart
-    // Dataset format:
-    /*
-        [
-            ['City', '2010 Population', '2000 Population'],
-            ['New York City, NY', 8175000, 8008000],
-            ['Los Angeles, CA', 3792000, 3694000],
-            ['Chicago, IL', 2695000, 2896000],
-            ['Houston, TX', 2099000, 1953000],
-            ['Philadelphia, PA', 1526000, 1517000] 
-        ]
-    */
-
-    /*------------------*/
-    var data = google.visualization.arrayToDataTable(
-        arr
-    );
-
-    // var materialOptions = {
-    //     chart: {
-    //         // title: 'Top-K Maximum Shapelets Ranking',
-    //         subtitle: 'Weight - Based on Grace Dataset - 15-points-5-months (Log)',
-    //     },
-    //     chartArea: { width: '90%' },
-    //     // hAxis: {
-    //     //     title: 'Weight',
-    //     //     minValue: 0,
-    //     // },
-    //     vAxis: {
-    //         title: 'Value'
-    //     },
-    //     bars: 'horizontal',
-    //     axes: {
-    //         y: {
-    //             0: { side: 'right' }
-    //         },
-    //         x: {
-    //             0: { side: 'top', label: 'Weight'} // Top x-axis.
-    //           }
-    //     }
-    // };
-    // var materialChart = new google.charts.Bar(document.getElementById(idName));
-    // materialChart.draw(data, materialOptions);
-
-    var options = {
-        chart: {
-        title: 'Top-K Maximum Shapelets Ranking',
-        subtitle: 'Weight - Based on Grace Dataset - 15-points-5-months (Log)',
-        },
-        bars: 'vertical',
-        vAxis: {
-        format: 'decimal'
-        },
-        height: 400,
-        colors: ['#1b9e77', '#d95f02', '#7570b3']
-    };
-
-    var materialChart = new google.charts.Bar(document.getElementById(idName));
-    materialChart.draw(data, google.charts.Bar.convertOptions(options));
-
-    var btns = document.getElementById('btn-group');
-
-    btns.onclick = function(e) {
-
-        if (e.target.tagName === 'BUTTON') {
-        options.vAxis.format = e.target.id === 'none' ? '' : e.target.id;
-        materialChart.draw(data, google.charts.Bar.convertOptions(options));
-        }
-    }
 }
 
 function formatTransformForZNormalization(lines) {
@@ -887,7 +645,7 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
 
     // For rendering update
     $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
-        if (allRenderedCount<topK-1) {
+        if (allRenderedCount < topK - 1) {
             var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
             // console.log("currentIdIndexTopK: " + currentIdIndex);
             // -------------------------------------------------------------------------------
@@ -915,7 +673,7 @@ function updateTopKCharts(shapeletSelection, labelSelection, topK) {
 
     // For rendering update
     $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
-        if (allRenderedCount<topK-1) {
+        if (allRenderedCount < topK - 1) {
             var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
             // console.log("currentIdIndexTopK: " + currentIdIndex);
             // -------------------------------------------------------------------------------
@@ -932,7 +690,7 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     // console.log("B");
     // ------------------------------------------
     // Retirve to the DOM structure in function topKCharts()
-    var subSubItem2 = document.getElementById('topKChartContainer_'+aChartId);
+    var subSubItem2 = document.getElementById('topKChartContainer_' + aChartId);
     var subSubSubItem2 = document.createElement("div");
     var chartId = "topKChart_" + aChartId;
     subSubSubItem2.setAttribute("id", chartId);
@@ -994,160 +752,128 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     chart.draw(data, options);
 }
 
-// function columnChart() {
-//     google.charts.load('current', {
-//         'packages': ['bar']
-//       });
-//       google.charts.setOnLoadCallback(drawChart);
-
-//       function drawChart() {
-//         var data = google.visualization.arrayToDataTable([
-//           ['Year', 'Sales', 'Expenses', 'Profit'],
-//           ['2014', 1000, 400, 200],
-//           ['2015', 1170, 460, 250],
-//           ['2016', 660, 1120, 300],
-//           ['2017', 1030, 540, 350]
-//         ]);
-
-//         var options = {
-//           chart: {
-//             title: 'Company Performance',
-//             subtitle: 'Sales, Expenses, and Profit: 2014-2017',
-//           },
-//           bars: 'vertical',
-//           vAxis: {
-//             format: 'decimal'
-//           },
-//           height: 400,
-//           colors: ['#1b9e77', '#d95f02', '#7570b3']
-//         };
-
-//         var chart = new google.charts.Bar(document.getElementById('chart_div'));
-
-//         chart.draw(data, google.charts.Bar.convertOptions(options));
-
-//         var btns = document.getElementById('btn-group');
-
-//         btns.onclick = function(e) {
-
-//           if (e.target.tagName === 'BUTTON') {
-//             options.vAxis.format = e.target.id === 'none' ? '' : e.target.id;
-//             chart.draw(data, google.charts.Bar.convertOptions(options));
-//           }
-//         }
-//       }
-
-// }
-
-
 /*----------------------*/
 // https://jsfiddle.net/canvasjs/fz66o4L0/
 
-function test() {}
+function test() { }
 
+function carouselHistogramChart(carouseId, numberOfChart, chartClassName, chartIdName) {
+    var herf = "#" + carouseId;
+    // var item1 = document.createElement("ol");
+    // item1.setAttribute("class", "carousel-indicators"); // The carousel-indicators created by js doesn't work, so hardcode them in html
 
-// function columnChart() {
-//     // var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
+    var item2 = document.createElement("div");
+    item2.setAttribute("class", "carousel-inner");
 
-//     var labelIndex = 0;
-//     var valuesIndex = 1;
+    var item3a = document.createElement("a");
+    item3a.setAttribute("class", "carousel-control-prev");
+    item3a.href = herf;
+    item3a.setAttribute("role", "button");
+    item3a.setAttribute("data-slide", "prev");
+    var subItem3ai = document.createElement("span");
+    subItem3ai.setAttribute("class", "carousel-control-prev-icon");
+    subItem3ai.setAttribute("aria-hidden", "false");
+    var subItem3aii = document.createElement("span");
+    subItem3aii.setAttribute("class", "sr-only");
+    var textSubItem3aii = document.createTextNode("Previous");
+    subItem3aii.appendChild(textSubItem3aii);
+    item3a.appendChild(subItem3ai);
+    item3a.appendChild(subItem3aii);
 
-//     var topK = 10; // default value: top 10
-//     var record_num = Number.POSITIVE_INFINITY;  // how many elements there are in each row
+    var item3b = document.createElement("a");
+    item3b.setAttribute("class", "carousel-control-next");
+    item3b.href = herf;
+    item3b.setAttribute("role", "button");
+    item3b.setAttribute("data-slide", "next");
+    var subItem3bi = document.createElement("span");
+    subItem3bi.setAttribute("class", "carousel-control-next-icon");
+    subItem3bi.setAttribute("aria-hidden", "false");
+    var subItem3bii = document.createElement("span");
+    subItem3bii.setAttribute("class", "sr-only");
+    var textSubItem3bii = document.createTextNode("Next");
+    subItem3bii.appendChild(textSubItem3bii);
+    item3b.appendChild(subItem3bi);
+    item3b.appendChild(subItem3bii);
 
-//     globalShapeletWeight.forEach(row => {
-//         if (row[valuesIndex].length < record_num) {
-//             record_num = row[valuesIndex].length;
-//         }
-//     });
+    // document.getElementById('carouselTopKChartsIndicators').appendChild(item1); // Since it doesn't work (the active term dosen't change)
+    document.getElementById(carouseId).appendChild(item2);
+    document.getElementById(carouseId).appendChild(item3a);
+    document.getElementById(carouseId).appendChild(item3b);
+    /*-----------------*/
 
-//     if (record_num < topK) {
-//         topK = record_num;
-//     }
-//     /*------------------*/
+    var start = 0;
+    for (var i = 0; i < numberOfChart; i++) {
+        var idName = chartIdName + "_" + i;
 
-//     var arr = [];
-//     var labelArr = ['Weight Ranking'];
+        var subItem2 = document.createElement("div");
+        if (i == start) {
+            subItem2.setAttribute("class", "carouseldashboardBarChartIndicators carousel-item active");
+        } else {
+            subItem2.setAttribute("class", "carouseldashboardBarChartIndicators carousel-item");
+        }
 
-//     globalShapeletWeight.forEach(row => {
-//         var label = row[labelIndex];
-//         labelArr.push('(Class ofShapelet) ' + label);
-//     });
+        var subSubItem2 = document.createElement("div");
+        var subSubItem3 = document.createElement("div");
+        var subSubSubItem3i = document.createElement("h4");
+        var subSubSubItem3ii = document.createElement("p");
+        subSubItem3.className = "container p-8 my-3 bg-dark text-white";
+        subSubSubItem3i.innerHTML = "Shapelet class: " + i;
+        subSubSubItem3ii.innerHTML = "This container has a dark background color and a white text, and some extra padding and margins.";
+        subSubItem3.appendChild(subSubSubItem3i);
+        subSubItem3.appendChild(subSubSubItem3ii);
 
-//     arr.push(labelArr); // Insert the legend for histogram
+        subSubItem2.setAttribute("id", idName);
+        subSubItem2.setAttribute("class", chartClassName);
+        subItem2.appendChild(subSubItem3);
+        subItem2.appendChild(subSubItem2);
+        item2.appendChild(subItem2);
+    }
 
-//     for (var i = topK - 1; i >= 0; i--) { // Since the index is from 0 -> top K
+    // Initialize the first active carousel slide in the first chart
+    var initializedIndex = 0;
+    // drawHistogram(initializedIndex);
+    drawDashboardBarChart(initializedIndex);
 
-//         var localArr = [];
+    var allRenderedCount = 0; // After all slides rendered, stop update
 
-//         localArr.push(i);
+    // For rendering update
+    $('#carouseldashboardBarChartIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
+        if (allRenderedCount < 1) {
+            var currentIndex = $('div.active.carouseldashboardBarChartIndicators').index();
+            var currentNodeChildren = $('div.active.carouseldashboardBarChartIndicators').children();
+            var firstChildId = currentNodeChildren[0].id;
+            // console.log(currentIndex + '/2');
+            console.log("currentNodeIdHistogram: " + firstChildId);
 
-//         globalShapeletWeight.forEach(row => {
-//             // console.log("row.length: " + row.length);
-//             var weightValueIndex = 1;
-//             if (i > row[valuesIndex].length) {
-//                 localArr.push(null);
-//             } else {
-//                 localArr.push(parseInt(row[valuesIndex][i][weightValueIndex]));
-//             }
-//         });
-//         arr.push(localArr); // Each time push one row (one label)
-//     }
+            // Render the chart when the slide has occured and compeleted rendering
+            // drawHistogram(currentIndex);
+            drawDashboardBarChart(currentIndex);
+            allRenderedCount++;
+        }
+    });
+}
 
-//     /*------------*/
-//     // Create a chart
-//     // Dataset format:
-//     /*
-//         [
-//           ['Year', 'Sales', 'Expenses', 'Profit'],
-//           ['2014', 1000, 400, 200],
-//           ['2015', 1170, 460, 250],
-//           ['2016', 660, 1120, 300],
-//           ['2017', 1030, 540, 350]
-//         ]
-//     */
+function drawDashboardBarChart(numOfIndex) {
 
-//    console.log("arr: " + arr);
+    console.log("numOfIndex:");
+    console.log(numOfIndex);
 
-//     /*------------------*/
-//     var data = google.visualization.arrayToDataTable(
-//         arr
-//     );
+    var carouseId = "carouseldashboardBarChartIndicators"; // Ensure that you have the same <div id="carouseldashboardBarChartIndicators" ... ></div> in html
 
-//     var options = {
-//         chart: {
-//         title: 'Top-K Maximum Shapelets Ranking',
-//         subtitle: 'Weight - Based on Grace Dataset - 15-points-5-months (Log)',
-//         },
-//         bars: 'vertical',
-//         vAxis: {
-//         format: 'decimal'
-//         },
-//         height: 400,
-//         colors: ['#1b9e77', '#d95f02', '#7570b3']
-//     };
+    /*------------*/
+    var secondChildIndex = 1; // The second element is <div class="carousel-inner">...</div>
+    var carouselInner = document.getElementById(carouseId).children[secondChildIndex];
+    var carouselItem = carouselInner.children[numOfIndex];
+    var firstChildIndex = 1;
+    var chartDiv = carouselItem.children[firstChildIndex];
+    var chartIdName = chartDiv.id;
+    // console.log("idName: " + idName);
 
-//     var materialChart = new google.charts.Bar(document.getElementById('chart_div'));
-//     materialChart.draw(data, google.charts.Bar.convertOptions(options));
-
-//     var btns = document.getElementById('btn-group');
-
-//     btns.onclick = function(e) {
-//         if (e.target.tagName === 'BUTTON') {
-//         options.vAxis.format = e.target.id === 'none' ? '' : e.target.id;
-//         materialChart.draw(data, google.charts.Bar.convertOptions(options));
-//         }
-//     }
-// }
-
-function abc() {
-
-    // var carouseId = "carouselHistogramIndicators"; // Ensure that you have the same <div id="carouselHistogramIndicators" ... ></div> in html
-
+    // Create a chart
     var labelIndex = 0;
     var valuesIndex = 1;
 
-    var topK = 10; // default value: top 10
+    var topK = 5; // default value: top 10
     var record_num = Number.POSITIVE_INFINITY;  // how many elements there are in each row
 
     globalShapeletWeight.forEach(row => {
@@ -1160,7 +886,6 @@ function abc() {
         topK = record_num;
     }
     /*------------------*/
-    
     shapeletNoArr = []
     shapeletWeightArr = []
     weightIndex = 1
@@ -1172,121 +897,158 @@ function abc() {
         currentShapeletWeightArr = []
         for (var i = topK - 1; i >= 0; i--) { // Since the index is from 0 -> top K
             // localArr.push(i);
-            currentShapeletNoArr.push('Shapelets\' class ' + row[weightIndex][i][shapeletNoIndex]);
-            currentShapeletWeightArr.push(row[weightIndex][i][shapeletWeightIndex]);
+            currentShapeletNoArr.push('Shapelets\' no. ' + row[weightIndex][i][shapeletNoIndex]);
+            // currentShapeletWeightArr.push(row[weightIndex][i][shapeletWeightIndex]);
+            currentShapeletWeightArr.push(parseInt(row[weightIndex][i][shapeletWeightIndex]));
         }
         shapeletNoArr.push(currentShapeletNoArr);
         shapeletWeightArr.push(currentShapeletWeightArr);
     });
 
-    console.log('globalShapeletWeight:');
-    console.log(globalShapeletWeight);
+    // var aMax = Number.NEGATIVE_INFINITY;
+    // shapeletWeightArr.forEach(weight => {
+    //     if (weight>aMax) {
+    //         aMax = weight;
+    //     }
+    // });
 
-    console.log('shapeletNoArr:');
-    console.log(shapeletNoArr);
+    var maxWeightVal = parseFloat(Math.max.apply(Math, shapeletWeightArr[numOfIndex])) * 1.4; // Set the whole length of a bar is 110% 
+    console.log("maxWeightVal:")
+    console.log(maxWeightVal)
+    shapeletWeightSupplementaryArr = []
+    // 0.1 * each element in shapeletWeightArr and store them into shapeletWeightSupplementaryArr for dashboard chart visualization effect
+    shapeletWeightArr[numOfIndex].forEach(weight => {
+        val = parseInt(maxWeightVal) - weight;
+        shapeletWeightSupplementaryArr.push(parseInt(val));
+    });
+
+    // console.log('globalShapeletWeight:');
+    // console.log(globalShapeletWeight);
+
+    // console.log('shapeletNoArr:');
+    // console.log(shapeletNoArr);
 
     /* --------------------------- */
     /* --------------------------- */
 
     ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "b55b025e438fa8a98e32482b5f768ff5"];
     let chartConfig = {
-      type: 'hbar',
-      backgroundColor: '#2A2B3A',
-      plot: {
-        tooltip: {
-          borderRadius: '2px',
-          borderWidth: '0px'
-        },
-        valueBox: {
-          text: '%v',
-          fontColor: '#2A2B3A',
-          fontSize: '14px',
-          visible: true
-        },
-        animation: {
-          effect: 'ANIMATION_EXPAND_TOP',
-          method: 'ANIMATION_BOUNCE_EASE_OUT',
-          sequence: 'ANIMATION_BY_PLOT_AND_NODE',
-          delay: 500
-        },
-        barsSpaceRight: '20px',
-        barsSpaceLeft: '20px',
-        stacked: true
-      },
-      plotarea: {
-        marginTop: '30px',
-        marginBottom: '30px',
-        marginLeft: '80px'
-      },
-      scaleX: {
-        item: {
-          fontColor: '#e8e8e8',
-          fontSize: '16px'
-        },
-        // labels: ['Dev', 'R&D', 'Testing'],
-        labels: shapeletNoArr[1],
-        lineColor: 'transparent',
-        tick: {
-          visible: false
-        }
-      },
-      scaleY: {
-        guide: {
-          visible: false
-        },
-        lineColor: 'transparent',
-        tick: {
-          visible: false
-        },
-        visible: false
-      },
-      tooltip: {
-        visible: false
-      },
-      series: [{
-        //   values: [3, 2, 6],
-          values: shapeletWeightArr[1],
-          backgroundColor: '#E71D36',
-          borderRadius: '50px 0px 0px 50px',
-          rules: [{
-              backgroundColor: '#E71D36',
-              rule: '%i === 0'
+        type: 'hbar',
+        backgroundColor: '#2A2B3A',
+        plot: {
+            title: {
+                "text": "Tech Giant Quarterly Revenue",
+                "font-color": "#ffffff",
+              },
+            tooltip: {
+                borderRadius: '2px',
+                borderWidth: '0px'
             },
-            {
-              backgroundColor: '#2EC4B6',
-              rule: '%i === 1'
+            valueBox: {
+                text: '%v',
+                fontColor: '#2A2B3A',
+                fontSize: '14px',
+                visible: true
             },
-            {
-              backgroundColor: '#FF9F1C',
-              rule: '%i === 2'
+            animation: {
+                effect: 'ANIMATION_EXPAND_TOP',
+                method: 'ANIMATION_BOUNCE_EASE_OUT',
+                sequence: 'ANIMATION_BY_PLOT_AND_NODE',
+                delay: 400
+            },
+            barsSpaceRight: '20px',
+            barsSpaceLeft: '20px',
+            stacked: true
+        },
+        plotarea: {
+            marginTop: '30px',
+            marginBottom: '30px',
+            marginLeft: '100px'
+        },
+        scaleX: {
+            item: {
+                fontColor: '#e8e8e8',
+                fontSize: '9px'
+            },
+            // labels: ['Dev', 'R&D', 'Testing'],
+            labels: shapeletNoArr[numOfIndex],
+            lineColor: 'transparent',
+            tick: {
+                visible: false
             }
-          ]
+        },
+        scaleY: {
+            guide: {
+                visible: false
+            },
+            lineColor: 'transparent',
+            tick: {
+                visible: false
+            },
+            visible: false
+        },
+        tooltip: {
+            visible: false
+        },
+        series: [{
+            //   values: [3, 2, 6],
+            values: shapeletWeightArr[numOfIndex],
+            backgroundColor: '#E71D36',
+            borderRadius: '50px 0px 0px 50px',
+            rules: [{
+                backgroundColor: '#4287f5',
+                rule: '%i === 0'
+            },
+            {
+                backgroundColor: '#bb60f0',
+                rule: '%i === 1'
+            }, {
+                backgroundColor: '#E71D36',
+                rule: '%i === 2'
+            },
+            {
+                backgroundColor: '#2EC4B6',
+                rule: '%i === 3'
+            },
+            {
+                backgroundColor: '#FF9F1C',
+                rule: '%i === 4'
+            }
+            ]
         },
         {
-          values: [7, 8, 4],
-          backgroundColor: '#E71D36',
-          borderRadius: '0px 50px 50px 0px',
-          rules: [{
-              backgroundColor: '#e85d6f',
-              rule: '%i === 0'
+            //   values: [7, 8, 4],
+            values: shapeletWeightSupplementaryArr,
+            backgroundColor: '#E71D36',
+            borderRadius: '0px 50px 50px 0px',
+            rules: [{
+                backgroundColor: '#83abeb',
+                rule: '%i === 0'
             },
             {
-              backgroundColor: '#90eae2',
-              rule: '%i === 1'
+                backgroundColor: '#c583eb',
+                rule: '%i === 1'
+            }, {
+                backgroundColor: '#e85d6f',
+                rule: '%i === 2'
             },
             {
-              backgroundColor: '#f7be70',
-              rule: '%i === 2'
+                backgroundColor: '#90eae2',
+                rule: '%i === 3'
+            },
+            {
+                backgroundColor: '#f7be70',
+                rule: '%i === 4'
             }
-          ]
+            ]
         }
-      ]
+        ]
     };
 
     zingchart.render({
-      id: 'myChart',
-      data: chartConfig,
-      width: '100%',
-      height: '100%',
+        id: chartIdName,
+        data: chartConfig,
+        width: '100%',
+        height: '100%',
     });
 }

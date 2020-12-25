@@ -5,7 +5,7 @@
 
 .lineChart
 {
-    margin-top: 50px;
+    margin-top: 30px;
     margin-bottom: 50px;
     margin-right: 10px;
     margin-left: 10px;
@@ -19,18 +19,6 @@
 {
     margin-right: 10px;
     margin-left: 10px;
-}
-
-.distributionChart
-{
-    margin-top: 30px;
-    margin-bottom: 30px;
-    margin-right: 50px;
-    margin-left: 50px;
-    /* height: 55%; */
-    /* width: 100%; */
-    /* width: 900px;
-    height: 500px; */
 }
 
 .scrollable-menu {
@@ -69,3 +57,7 @@
   .zc-ref {
     display: none;
   }
+
+  /* .couraselInnerText {
+    margin-left: 10px;
+  } */
