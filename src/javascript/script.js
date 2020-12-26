@@ -728,11 +728,6 @@ function updateTopKCharts(shapeletSelection, labelSelection, topK) {
     var timeseriesNumIndex = 0; // According to distanceAll's structure
     var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
 
-    console.log("---shapeletSelection: ");
-    console.log(shapeletSelection);
-    console.log("---underConditionDistanceArr: ");
-    console.log(underConditionDistanceArr);
-
     var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
     console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
     setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
@@ -759,11 +754,17 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     // ------------------------------------------
     // Retirve to the DOM structure in function topKCharts()
     var subSubItem2 = document.getElementById('topKChartContainer_' + aChartId);
+
+    // Remove all children charts to avoid duplicated charts
+    while (subSubItem2.firstChild) {
+        subSubItem2.removeChild(subSubItem2.firstChild);
+    }
+
     var subSubSubItem2 = document.createElement("div");
     var chartId = "topKChart_" + aChartId;
     subSubSubItem2.setAttribute("id", chartId);
     subSubSubItem2.setAttribute("class", "lineChart");
-    subSubSubItem2.setAttribute("style", "width: 100%; height: 20%;");
+    subSubSubItem2.setAttribute("style", "width: 100%; height: 30%;");
     // Parent-Child appending
     subSubItem2.appendChild(subSubSubItem2);
 
@@ -892,6 +893,12 @@ function carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName
 
         subSubItem2.setAttribute("id", idName);
         subSubItem2.setAttribute("class", chartClassName);
+
+        // Remove all children charts to avoid duplicated charts
+        while (subItem2.firstChild) {
+            subItem2.removeChild(subItem2.firstChild);
+        }
+
         subItem2.appendChild(subSubItem3);
         subItem2.appendChild(subSubItem2);
         item2.appendChild(subItem2);
