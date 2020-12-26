@@ -78,6 +78,7 @@ function addEventHandlers() {
         newValue = $(this).val()
         currentShapeletSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
         updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
+        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     })
 
     var maxLenLabel = labelSet.size - 1;
@@ -188,12 +189,18 @@ function processData(allText, type) {
     }
 
     if (type.toLowerCase() == "timeseries") {
+        console.log("[timeseries]--->");
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
         globalLinesTimeseries = linesTmp;
         // globalLinesTimeseries = lines;
+        console.log("-----------------");
     } else if (type.toLowerCase() == "shapelet") {
+        console.log("[shapelet]--->");
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
         globalLinesShapelet = linesTmp;
+        console.log("-----------------");
+        // console.log("globalLinesShapelet:");
+        // console.log(globalLinesShapelet);
         // globalLinesShapelet = lines;
     } else if (type.toLowerCase() == "shapeletweight") {
         // Assign a no. column to this dataset
@@ -248,16 +255,34 @@ function getShortestDistance(aTimeseries, aShapelet) { /*** Every plot after loa
             // index in indexthis.aVariables.currentShapelet
             distanceBetweenST += Math.pow(aTimeseries[i + j] - aShapelet[j], 2.0);
         }
-        distanceBetweenST = Math.sqrt(distanceBetweenST);
 
         // console.log("Distance: " + distanceBetweenST);
 
+        distanceBetweenST = Math.sqrt(distanceBetweenST);
         //System.out.println("distanceBetweenST "+distanceBetweenST);
         if (distanceBetweenST < distanceMin) {
             distanceMin = distanceBetweenST;
             startPosition = i;
         }
     }
+
+    if(distanceMin === Infinity){
+        for (var j = 0; j < aShapelet.length; j++) { // j=1 -> discard first label
+            // index in indexthis.aVariables.currentShapelet
+            // distanceBetweenST += Math.pow(aTimeseries[i + j] - aShapelet[j], 2.0);
+            console.log("-------")
+            console.log("aTimeseries[i + j]:")
+            console.log(aTimeseries[i + j])
+            console.log("aShapelet[j]:")
+            console.log(aShapelet[j])
+        }
+
+        console.log("aShapelet:")
+        console.log(aShapelet)
+
+        throw new Error('Infinity exception message');
+    }
+
     return [distanceMin, startPosition];
 }
 
@@ -479,22 +504,28 @@ function formatTransformForZNormalization(lines) {
 
     // Restore all nomarlized values
 
-    var len = lines[0][1].length; // The number of values of the first timeseries(patient) since the length of each timeseries is equal
+    var valuesIndex = 1;
     var linesTmp = [];
-    var count = 0;
 
     lines.forEach(line => {
+        var len = line[valuesIndex].length; // The number of values of the each shapelet/timeseries(patient) since the length of each timeseries is equal
         // Only refer to the label of each timeseries
         var lineTmp = [];
         var valuesTmp = [];
         var labelTmp = line[defaultLabelIndex];
-
-        for (var i = count; i < len; i++) { // Each time count 'len' number of values
+        
+        for (var i = 0; i < len; i++) { // Each time count 'timeseriesLen' number of values
             var val = arrNormalized[i];
+            if (val === undefined){
+                throw new Error('Result Infinity exception message');
+            }
             valuesTmp.push(val);
-            arrNormalized.shift();
         }
 
+        // we have to shift a shapelet/timeseries length of elements once, instead of one by one. Otherwise, it will cause some mechanical issue
+        for (var i = 0; i < len; i++) {
+            arrNormalized.shift();
+        }
         // console.log("arrNormalized.length: " + arrNormalized.length);
 
         lineTmp.push(labelTmp);
@@ -528,9 +559,23 @@ function zScoreNormalization(arr) {
     var arrTmp = [];
     arr.forEach(val => {
         var result = (val - mean) / SD;
+        if (result === undefined){
+            console.log("result:");
+            console.log(result);
+            throw new Error('Result Infinity exception message');
+        }
         arrTmp.push(result);
     });
 
+    arrTmp.forEach(val => {
+        // console.log("---");
+        if (val === undefined || val === Infinity){
+            console.log("val:");
+            console.log(val);
+        }
+    });
+
+    // console.log("arrTmp:");
     // console.log(arrTmp);
     return arrTmp;
 }
@@ -673,6 +718,12 @@ function updateTopKCharts(shapeletSelection, labelSelection, topK) {
     var timeseriesIndex = 1; // According to distanceAll's structure
     var timeseriesNumIndex = 0; // According to distanceAll's structure
     var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+
+    console.log("---shapeletSelection: ");
+    console.log(shapeletSelection);
+    console.log("---underConditionDistanceArr: ");
+    console.log(underConditionDistanceArr);
+
     var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
     console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
     setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
@@ -825,7 +876,7 @@ function carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName
         var subSubSubItem3ii = document.createElement("p");
         subSubItem3.className = "container p-8 my-3 bg-dark text-white";
         subSubSubItem3i.innerHTML = "Shapelet Class: " + i;
-        subSubSubItem3ii.innerHTML = "Shapelet Weight: the greater the shapelet weight, the more it timeseries small distance.";
+        subSubSubItem3ii.innerHTML = "Shapelet weight: the greater the shapelet weight, the more it timeseries small distance.";
         subSubItem3.appendChild(subSubSubItem3i);
         subSubItem3.appendChild(subSubSubItem3ii);
 
