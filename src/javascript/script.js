@@ -1,7 +1,7 @@
 // Difference between pageLoad , onload & $(document).ready(): https://stackoverflow.com/questions/7971615/difference-between-pageload-onload-document-ready#:~:text=The%20ready%20event%20occurs%20after,event%20is%20specific%20to%20jQuery.&text=I%20know%20HTML%20document%20load%20means%20all%20page%20element%20load%20complete.
 
 // Load timeseries dataset
-var globalLinesTimeseries;
+var globalLinesTimeseries = [];
 /*
 [
     [[0], [1, 2, 3, 4, 5, 6 ...]],
@@ -10,10 +10,10 @@ var globalLinesTimeseries;
     ...
 ]
 */
-var globalLinesShapelet;
-var globalShapeletWeight;
-var currentLabelLinesTimeseries;
-var currentLabelLinesShapelet;
+var globalLinesShapelet = [];
+var globalShapeletWeight = [];
+var currentLabelLinesTimeseries = [];
+var currentLabelLinesShapelet = [];
 var labelSet;
 
 /*------------*/
@@ -109,9 +109,17 @@ google.charts.load('current', { packages: ['corechart', 'bar'] });
 
 function loadTimeseries() {
     $(document).ready(function () {
+        // Loading test dataset
         $.ajax({
             type: "GET",
             url: "../datasets/ItalyPowerDemand_dataset/v_1/ItalyPowerDemand/ItalyPowerDemand0/ItalyPowerDemand0_TEST",
+            dataType: null,
+            success: function (data) { processData(data, "timeseries"); }
+        });
+        // Loading train dataset
+        $.ajax({
+            type: "GET",
+            url: "../datasets/ItalyPowerDemand_dataset/v_1/ItalyPowerDemand/ItalyPowerDemand0/ItalyPowerDemand0_TRAIN",
             dataType: null,
             success: function (data) { processData(data, "timeseries"); }
         });
@@ -189,13 +197,14 @@ function processData(allText, type) {
     }
 
     if (type.toLowerCase() == "timeseries") {
-        console.log("[timeseries]--->");
+        // Since the timeseries dataset has train and test dataset, therefore this block will be called twice. Thus, the array concat() function is needed.
+        console.log("Loading timeseries dataset (this block will be invoked twice).");
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
-        globalLinesTimeseries = linesTmp;
-        // globalLinesTimeseries = lines;
+        var tempArr = globalLinesTimeseries;
+        globalLinesTimeseries = tempArr.concat(linesTmp);
         console.log("-----------------");
     } else if (type.toLowerCase() == "shapelet") {
-        console.log("[shapelet]--->");
+        console.log("Loading shapelet dataset.");
         var linesTmp = formatTransformForZNormalization(lines); // Choose Z-normalization
         globalLinesShapelet = linesTmp;
         console.log("-----------------");
