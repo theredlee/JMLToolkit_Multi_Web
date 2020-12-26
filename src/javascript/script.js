@@ -65,6 +65,7 @@ function addEventHandlers() {
         // alert(currentLabelSelection)
         updateTimeseries(currentLabelSelection);
         updateShapelet(currentLabelSelection);
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
         updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     });
 
