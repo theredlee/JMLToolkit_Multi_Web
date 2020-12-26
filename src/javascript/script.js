@@ -665,7 +665,7 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
         var subSubItem2 = document.createElement("div");
         subSubItem2.setAttribute("class", "container justify-content-center");
         subSubItem2.setAttribute("id", "topKChartContainer_" + i);
-        subSubItem2.setAttribute("style", "padding-right: 10%;");
+        subSubItem2.setAttribute("style", "padding-right: 15%; padding-left: 15%;");
         subItem2.appendChild(subSubItem3);
         subItem2.appendChild(subSubItem2);
         item2.appendChild(subItem2);
@@ -763,6 +763,7 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     var chartId = "topKChart_" + aChartId;
     subSubSubItem2.setAttribute("id", chartId);
     subSubSubItem2.setAttribute("class", "lineChart");
+    subSubSubItem2.setAttribute("style", "width: 100%; height: 20%;");
     // Parent-Child appending
     subSubItem2.appendChild(subSubSubItem2);
 
@@ -1014,7 +1015,7 @@ function drawDashboardBarChart(numOfIndex) {
             valueBox: {
                 text: '%v',
                 fontColor: '#2A2B3A',
-                fontSize: '14px',
+                fontSize: '13px',
                 visible: true
             },
             animation: {
@@ -1035,7 +1036,7 @@ function drawDashboardBarChart(numOfIndex) {
         scaleX: {
             item: {
                 fontColor: '#e8e8e8',
-                fontSize: '9px'
+                fontSize: '10px'
             },
             // labels: ['Dev', 'R&D', 'Testing'],
             labels: shapeletNoArr[numOfIndex],
