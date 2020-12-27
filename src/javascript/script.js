@@ -1,4 +1,6 @@
 // Difference between pageLoad , onload & $(document).ready(): https://stackoverflow.com/questions/7971615/difference-between-pageload-onload-document-ready#:~:text=The%20ready%20event%20occurs%20after,event%20is%20specific%20to%20jQuery.&text=I%20know%20HTML%20document%20load%20means%20all%20page%20element%20load%20complete.
+google.charts.load('current', { packages: ['corechart', 'bar'] });
+// google.load('visualization', '1.0', { 'packages': ['corechart'], 'callback': drawCharts });
 
 // Load timeseries dataset
 var globalLinesTimeseries = [];
@@ -47,6 +49,7 @@ window.onload = function () {
     updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
     getAllDistances();
     topKCharts(currentShapeletSelection, currentLabelSelection, topK);
+    drawOneShapeletAllDistanceHistogram();
 
     var carouseId = "carouselDashboardBarChartIndicators"; // Ensure that you have the same <div id="carouselDashboardBarChartIndicators" ... ></div> in html
     var numberOfChart = 2;
@@ -101,11 +104,7 @@ function addEventHandlers() {
     });
 }
 
-google.charts.load('current', { packages: ['corechart', 'bar'] });
-// google.load('visualization', '1.0', { 'packages': ['corechart'], 'callback': drawCharts });
-
 /*----------------------------------------*/
-
 function loadTimeseries() {
     $(document).ready(function () {
         // Loading test dataset
@@ -809,8 +808,6 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId, aDista
 /*----------------------*/
 // https://jsfiddle.net/canvasjs/fz66o4L0/
 
-function test() { }
-
 function carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName, chartIdName) {
     var herf = "#" + carouseId;
     // var item1 = document.createElement("ol");
@@ -1112,3 +1109,94 @@ function drawDashboardBarChart(numOfIndex) {
         height: '100%',
     });
 }
+
+function drawOneShapeletAllDistanceHistogram() {
+
+    var timeseriesIndex = 1; // According to distanceAll's structure
+    var timeseriesNumIndex = 0; // According to distanceAll's structure
+    var distanceAndStartPositionArrIndex = 1; // According to distanceAll's structure
+    var distanceNumIndex = 0; // According to distanceAll's structure
+    var maxAllDistancePerLabelCount = Number.NEGATIVE_INFINITY;
+
+    distanceAll.forEach(distancePerLabelArr => {
+        var len = distancePerLabelArr[currentShapeletSelection][timeseriesIndex].length;
+        if (len>maxAllDistancePerLabelCount) {
+            maxAllDistancePerLabelCount = len;
+        }
+    });
+
+    console.log("maxAllDistancePerLabelCount:");
+    console.log(maxAllDistancePerLabelCount);
+
+    var dataArr = [];
+    dataArr.push(['Class 0', 'Class 1']);
+
+    // Travel all distance given specific label and shapelet
+    for (var noOfDistanceIndex=0; noOfDistanceIndex<maxAllDistancePerLabelCount; noOfDistanceIndex++) {
+        var anArr = [];
+        for (var labelSelection=0; labelSelection<2; labelSelection++) {
+            var aDistanceArr = distanceAll[labelSelection][currentShapeletSelection];
+            var a = aDistanceArr[timeseriesIndex];
+            // Check the total number of timeseries distances per label
+            if (noOfDistanceIndex > a.length-1) {
+                var distance = null;
+                anArr.push(distance);
+            }else{
+                var b = a[noOfDistanceIndex];
+                var c = b[distanceAndStartPositionArrIndex];
+                var d = c[distanceNumIndex];
+
+                var distance = d;
+                anArr.push(distance);
+            }
+        }
+        dataArr.push(anArr);
+    }
+
+    console.log("dataArr:");
+    console.log(dataArr);
+
+    // Define the chart to be drawn.
+    // var data = google.visualization.arrayToDataTable([
+    //     ['Quarks', 'Leptons'],
+    //     [2/3, -1],
+    //     [-1/3, 0],
+    //     [-1/3, 0],
+    //     [-1/3, 0],
+    //     [-1/3, 0]
+    //   ]);
+    var data = google.visualization.arrayToDataTable(
+        dataArr
+    );
+    
+      var options = {
+        title: 'Charges of subatomic particles',
+        legend: { position: 'top'},
+        colors: ['#999999', '#1A8763', '#5C3292', '#871B47'],
+        interpolateNulls: false,
+        histogram: { lastBucketPercentile: 5,  bucketSize: 0.1},
+      };	
+      
+    //   var options = {
+    //     title: 'Approximating Normal Distribution',
+    //     legend: { position: 'none' },
+    //     colors: ['#4285F4'],
+    
+    //     chartArea: { width: 405 },
+    //     hAxis: {
+    //       ticks: [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
+    //     },
+    //     bar: { gap: 0 },
+    
+    //     histogram: {
+    //       bucketSize: 0.01,
+    //       maxNumBuckets: 400,
+    //       minValue: -1,
+    //       maxValue: 1
+    //     }
+    //   };
+
+     // Instantiate and draw the chart.
+     var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+        chart.draw(data, options);
+  }
