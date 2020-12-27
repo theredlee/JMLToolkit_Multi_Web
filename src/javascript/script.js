@@ -65,8 +65,7 @@ function addEventHandlers() {
         // alert(currentLabelSelection)
         updateTimeseries(currentLabelSelection);
         updateShapelet(currentLabelSelection);
-        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection
-        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection// updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     });
 
     $("#timeseriesSelectionInput").on("change", function (event) {
@@ -79,7 +78,6 @@ function addEventHandlers() {
         newValue = $(this).val()
         currentShapeletSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
         updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
-        updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
     })
 
     var maxLenLabel = labelSet.size - 1;
@@ -355,11 +353,11 @@ function getAllDistances() {
             [ // one label's distance
                 [ // for one shaplet
                     [0], // shapelet no.0
-                    [[0, 1.2], [1, 0,97], [2, 3.2], [3, 5.7] ...] // distance from each pari of shapelet and timeseries
+                    [[timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], ...] // distance from each pari of shapelet and timeseries
                 ],
                 [ // for another shapelet
                     [1], // shapelet no.1
-                    [[0, 0.22], [1, 1,97], [2, 1.51], [3, 3.1] ...] // distance from each pari of shapelet and timeseries
+                    [[timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], ...] // distance from each pari of shapelet and timeseries
                 ]
                 ...
             ],
@@ -700,57 +698,43 @@ function topKCharts(shapeletSelection, labelSelection, topK) {
     var initialChartId = 0 // initialID = 0
     var timeseriesIndex = 1; // According to distanceAll's structure
     var timeseriesNumIndex = 0; // According to distanceAll's structure
+    var distanceAndStartPositionArrIndex = 1; // According to distanceAll's structure
+    var distanceNumIndex = 0; // According to distanceAll's structure
+
     var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+    /*---*/
     var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
-    console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-    setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
+    var distance = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][distanceAndStartPositionArrIndex][distanceNumIndex]; // [[timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], ...] // distance from each pari of shapelet and timeseries
 
-    var allRenderedCount = 0; // After all slides rendered, stop update
+    console.log("timeseriesSelection: " + timeseriesSelection + ", labelSelection: " + labelSelection + ", shapeletSelection: " + shapeletSelection + ", distance: " + distance);
+    setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId, distance);
 
-    // For rendering update
-    $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
-        if (allRenderedCount < topK - 1) {
-            var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
-            // console.log("currentIdIndexTopK: " + currentIdIndex);
-            // -------------------------------------------------------------------------------
-            var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][currentIdIndex][timeseriesNumIndex];
-            console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-            setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, currentIdIndex); // Create a chart
-            allRenderedCount++;
-            // -------------------------------------------------------------------------------
-        }
-    });
+    // Bind the courasel event
+    updateTopKCharts();
 }
 
-function updateTopKCharts(shapeletSelection, labelSelection, topK) {
-    var firstMinimunDistanceIndex = 0;
-    var initialChartId = 0 // initialID = 0
+function updateTopKCharts() {
+
     var timeseriesIndex = 1; // According to distanceAll's structure
     var timeseriesNumIndex = 0; // According to distanceAll's structure
-    var underConditionDistanceArr = distanceAll[labelSelection][shapeletSelection];
+    var distanceAndStartPositionArrIndex = 1; // According to distanceAll's structure
+    var distanceNumIndex = 0; // According to distanceAll's structure
 
-    var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][firstMinimunDistanceIndex][timeseriesNumIndex]; // [[9, 0,97], [2, 1.2], [7, 3.2], [1, 5.7] ...] // [no. ,distanceValue] distance from each pari of shapelet and timeseries
-    console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-    setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, initialChartId);
-
-    var allRenderedCount = 0; // After all slides rendered, stop update
-
-    // For rendering update
     $('#carouselTopKChartsIndicators').bind('slid.bs.carousel', function () { // slid.bs.carousel: This event is fired when the carousel has completed its slide transition.
-        if (allRenderedCount < topK - 1) {
-            var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
-            // console.log("currentIdIndexTopK: " + currentIdIndex);
-            // -------------------------------------------------------------------------------
-            var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][currentIdIndex][timeseriesNumIndex];
-            console.log("timeseriesSelection: " + timeseriesSelection + ", shapeletSelection: " + shapeletSelection + ", labelSelection: " + labelSelection);
-            setATopKCharts(timeseriesSelection, shapeletSelection, labelSelection, currentIdIndex); // Create a chart
-            allRenderedCount++;
-            // -------------------------------------------------------------------------------
-        }
+        underConditionDistanceArr = distanceAll[currentLabelSelection][currentShapeletSelection];
+        var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
+        // console.log("currentIdIndexTopK: " + currentIdIndex);
+        // -------------------------------------------------------------------------------
+        var timeseriesSelection = underConditionDistanceArr[timeseriesIndex][currentIdIndex][timeseriesNumIndex];
+        var distance = underConditionDistanceArr[timeseriesIndex][currentIdIndex][distanceAndStartPositionArrIndex][distanceNumIndex]; // [[timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], [timeseriesNo., [distance, start position]], ...] // distance from each pari of shapelet and timeseries
+        
+        console.log("timeseriesSelection: " + timeseriesSelection + ", currentLabelSelection: " + currentLabelSelection + ", currentShapeletSelection: " + currentShapeletSelection + ", distance: " + distance);
+        setATopKCharts(timeseriesSelection, currentShapeletSelection, currentLabelSelection, currentIdIndex, distance); // Create a chart
+        // -------------------------------------------------------------------------------
     });
 }
 
-function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // updateChart is based on draw chart, and the original drawChart() is deleted
+function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId, aDistance) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
     // ------------------------------------------
     // Retirve to the DOM structure in function topKCharts()
@@ -765,7 +749,7 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     var chartId = "topKChart_" + aChartId;
     subSubSubItem2.setAttribute("id", chartId);
     subSubSubItem2.setAttribute("class", "lineChart");
-    subSubSubItem2.setAttribute("style", "width: 100%; height: 30%;");
+    subSubSubItem2.setAttribute("style", "width: 100%; height: 35%;");
     // Parent-Child appending
     subSubItem2.appendChild(subSubSubItem2);
 
@@ -811,7 +795,7 @@ function setATopKCharts(noTimeseries, noShapelet, currentlabel, aChartId) { // u
     );
 
     var options = {
-        title: 'Distance between timeseries no.' + noTimeseries + ', shapelet no.' + noShapelet + ', Label no.' + currentlabel,
+        title: '[Label: ' + currentlabel + ']:' + ' distance between shapelet no.' + noShapelet + ', timeseries no.' + noTimeseries + '\n distance: ' + aDistance.toFixed(2),
         curveType: 'function',
         legend: { position: 'bottom' },
     };
@@ -887,8 +871,8 @@ function carouselDashboardBarChartChart(carouseId, numberOfChart, chartClassName
         var subSubSubItem3i = document.createElement("h5");
         var subSubSubItem3ii = document.createElement("p");
         subSubItem3.className = "container p-8 my-3 bg-dark text-white";
-        subSubSubItem3i.innerHTML = "Shapelet Class: " + i;
-        subSubSubItem3ii.innerHTML = "Shapelet weight: the greater the shapelet weight, the more it timeseries small distance.";
+        subSubSubItem3i.innerHTML = "Shapelet Weight Class: " + i;
+        subSubSubItem3ii.innerHTML = "The greater the shapelet weight, the more it timeseries small distance.";
         subSubItem3.appendChild(subSubSubItem3i);
         subSubItem3.appendChild(subSubSubItem3ii);
 
