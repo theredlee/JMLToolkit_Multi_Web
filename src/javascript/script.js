@@ -19,7 +19,8 @@ var currentLabelLinesShapelet = [];
 var labelSet;
 
 /*------------*/
-var currentLabelSelection;
+var currentTimeseriesLabelSelection;
+var currentShapeletLabelSelection;
 var currentTimeseriesSelection;
 var currentShapeletSelection;
 
@@ -43,13 +44,14 @@ window.onload = function () {
     var defaultTimeseriesAndShapeletSelection = 0;
     currentTimeseriesSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentTimeseriesSelection with defaultTimeseriesAndShapeletSelection 0
     currentShapeletSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentShapeletSelection with defaultTimeseriesAndShapeletSelection 0
-    currentLabelSelection = defaultTimeseriesAndShapeletSelection; // Initialize the currentLabelSelection with defaultTimeseriesAndShapeletSelection 0
+    currentTimeseriesLabelSelection = defaultTimeseriesAndShapeletSelection;
+    currentShapeletLabelSelection = defaultTimeseriesAndShapeletSelection;
     updateTimeseries(defaultLabelSelection); // Initialize the currentLabelLinesTimeseries with defaultLabelSelection 0
     updateShapelet(defaultLabelSelection); // Initialize the currentLabelLinesShapelet with defaultLabelSelection 0
     updateChart(defaultTimeseriesAndShapeletSelection, defaultTimeseriesAndShapeletSelection); // Initialize the chart with the no.0 timeseries and no.0 shapelet
     getAllDistances();
     topKCharts();
-    drawOneShapeletAllDistanceHistogram(currentShapeletSelection, currentLabelSelection);
+    drawOneShapeletAllDistanceHistogram(currentShapeletSelection, currentShapeletLabelSelection);
 
     var carouseId = "carouselDashboardBarChartIndicators"; // Ensure that you have the same <div id="carouselDashboardBarChartIndicators" ... ></div> in html
     var numberOfChart = 2;
@@ -62,13 +64,30 @@ window.onload = function () {
 }
 
 function addEventHandlers() {
-    $('#labelSelectionInput').on("change", function (event) {
-        newValue = $(this).val()
-        currentLabelSelection = parseInt(parseInt(newValue));
-        // alert(currentLabelSelection)
-        updateTimeseries(currentLabelSelection);
-        updateShapelet(currentLabelSelection);
-        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection// updateTopKCharts(currentShapeletSelection, currentLabelSelection, topK); // TopK is initialized at the variable declaration
+    $('#timeseriesLabelSelectionInput').on("change", function (event) {
+        newValue = $(this).find("option:selected").text();
+        var label;
+        if (newValue == "Timeseries - Class0") {
+            label = 0;
+        }else{
+            label = 1;
+        }
+        currentTimeseriesLabelSelection = parseInt(parseInt(label));
+        updateTimeseries(currentTimeseriesLabelSelection);
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection// updateTopKCharts(currentShapeletSelection, currentShapeletLabelSelection, topK); // TopK is initialized at the variable declaration
+    });
+
+    $('#shapeletLabelSelectionInput').on("change", function (event) {
+        newValue = $(this).find("option:selected").text();
+        var label;
+        if (newValue == "Shapelet - Class0") {
+            label = 0;
+        }else{
+            label = 1;
+        }
+        currentShapeletLabelSelection = parseInt(parseInt(label));
+        updateShapelet(currentShapeletLabelSelection);
+        updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentShapeletSelection with the last shapelet selection// updateTopKCharts(currentShapeletSelection, currentShapeletLabelSelection, topK); // TopK is initialized at the variable declaration
     });
 
     $("#timeseriesSelectionInput").on("change", function (event) {
@@ -81,7 +100,7 @@ function addEventHandlers() {
         newValue = $(this).val()
         currentShapeletSelection = parseInt(newValue); // Update currentTimeseriesSelection with the clicking item and use it in the next line
         updateChart(currentTimeseriesSelection, currentShapeletSelection); // Use the currentTimeseriesSelection with the last timeseries selection
-        drawOneShapeletAllDistanceHistogram(currentShapeletSelection, currentLabelSelection);
+        drawOneShapeletAllDistanceHistogram(currentShapeletSelection, currentShapeletLabelSelection);
     })
 
     var maxLenLabel = labelSet.size - 1;
@@ -441,7 +460,8 @@ function getAllDistances() {
 /*------------------------------------------------------------*/
 function updateChart(noTimeseries, noShapelet) { // updateChart is based on draw chart, and the original drawChart() is deleted
     // console.log("B");
-    console.log("currentLabelSelection: " + currentLabelSelection);
+    console.log("currentTimeseriesLabelSelection: " + currentTimeseriesLabelSelection);
+    console.log("currentShapeletLabelSelection: " + currentShapeletLabelSelection);
     console.log("noTimeseries: " + noTimeseries);
     console.log("noShapelet: " + noShapelet);
     console.log("------------");
@@ -681,7 +701,6 @@ function topKCharts() {
         var subSubItem3 = document.createElement("div");
         var subSubSubItem3i = document.createElement("h6");
         var subSubSubItem3ii = document.createElement("p");
-        var distanceDescriptionArr = ['1st', '2nd', '3rd', '4th', '5th'];
         subSubItem3.className = "container p-8 my-3 bg-dark text-white";
         // subSubSubItem3i.innerHTML = "The " + distanceDescriptionArr[i] + " shortest distance";
         subSubSubItem3i.innerHTML = "The Shortest Distance Pair: " + (i + 1);
@@ -730,7 +749,7 @@ function topKCharts() {
     }
 
     var initialChartId = 0 // initialID = 0
-    var twoLabelsTopKArr = getTopKDistance(currentShapeletSelection, currentLabelSelection, topK); // return [firstTimeseriesSelection, timeseriesLabel, distance, shapeletStartPosition]s
+    var twoLabelsTopKArr = getTopKDistance(currentShapeletSelection, currentShapeletLabelSelection, topK); // return [firstTimeseriesSelection, timeseriesLabel, distance, shapeletStartPosition]s
 
     var firstMinimunDistanceIndex = 0;
     /*---*/
@@ -747,9 +766,9 @@ function topKCharts() {
     var distance = timeseriesInfoArr[newDistanceAndStartPositionIndex][distanceIndex];
     var shapeletStartPosition = timeseriesInfoArr[newDistanceAndStartPositionIndex][shapeletStartPositionIndex];
 
-    console.log("timeseriesNumSelection: " + timeseriesNumSelection + ", timeseriesLabel: " + timeseriesLabel + "currentLabelSelection: " + currentLabelSelection + ", currentShapeletSelection: " + currentShapeletSelection + ", distance: " + distance);
+    console.log("timeseriesNumSelection: " + timeseriesNumSelection + ", timeseriesLabel: " + timeseriesLabel + "currentTimeseriesLabelSelection: " + currentTimeseriesLabelSelection + ", currentShapeletSelection: " + currentShapeletSelection + "currentShapeletLabelSelection: " + currentShapeletLabelSelection + ", distance: " + distance);
 
-    setATopKCharts(timeseriesNumSelection, currentShapeletSelection, currentLabelSelection, initialChartId, timeseriesLabel, distance, shapeletStartPosition);
+    setATopKCharts(timeseriesNumSelection, currentShapeletSelection, currentShapeletLabelSelection, initialChartId, timeseriesLabel, distance, shapeletStartPosition);
     // Bind the courasel event
     updateTopKCharts();
 }
@@ -760,7 +779,7 @@ function updateTopKCharts() {
         var currentIdIndex = $('div.active.carouselTopKChartsIndicators').index();
         // console.log("currentIdIndexTopK: " + currentIdIndex);
         // -------------------------------------------------------------------------------
-        var twoLabelsTopKArr = getTopKDistance(currentShapeletSelection, currentLabelSelection, topK); // return [firstTimeseriesSelection, timeseriesLabel, distance, shapeletStartPosition]
+        var twoLabelsTopKArr = getTopKDistance(currentShapeletSelection, currentShapeletLabelSelection, topK); // return [firstTimeseriesSelection, timeseriesLabel, distance, shapeletStartPosition]
 
         /*---*/
         var timeseriesNumIndex = 0;
@@ -774,13 +793,10 @@ function updateTopKCharts() {
         var timeseriesLabel = timeseriesInfoArr[timeseriesLabelIndex];
         var distance = timeseriesInfoArr[newDistanceAndStartPositionIndex][distanceIndex];
         var shapeletStartPosition = timeseriesInfoArr[newDistanceAndStartPositionIndex][shapeletStartPositionIndex];
-        
-        console.log("shapeletStartPosition-:");
-        console.log(shapeletStartPosition);
 
-        console.log("timeseriesNumSelection: " + timeseriesNumSelection + ", timeseriesLabel: " + timeseriesLabel + "currentLabelSelection: " + currentLabelSelection + ", currentShapeletSelection: " + currentShapeletSelection + ", distance: " + distance);
+        console.log("timeseriesNumSelection: " + timeseriesNumSelection + ", timeseriesLabel: " + timeseriesLabel + "currentTimeseriesLabelSelection: " + currentTimeseriesLabelSelection + ", currentShapeletSelection: " + currentShapeletSelection + "currentShapeletLabelSelection: " + currentShapeletLabelSelection + ", distance: " + distance);
 
-        setATopKCharts(timeseriesNumSelection, currentShapeletSelection, currentLabelSelection, currentIdIndex, timeseriesLabel, distance, shapeletStartPosition); // Create a chart
+        setATopKCharts(timeseriesNumSelection, currentShapeletSelection, currentShapeletLabelSelection, currentIdIndex, timeseriesLabel, distance, shapeletStartPosition); // Create a chart
         // -------------------------------------------------------------------------------
     });
 }
@@ -1068,7 +1084,7 @@ function drawDashboardBarChart(numOfIndex) {
         currentShapeletWeightArr = []
         for (var i = topK - 1; i >= 0; i--) { // Since the index is from 0 -> top K
             // localArr.push(i);
-            currentShapeletNoArr.push('Shapelets\' no. ' + row[weightIndex][i][shapeletNoIndex]);
+            currentShapeletNoArr.push('Shapelet no. ' + row[weightIndex][i][shapeletNoIndex]);
             // currentShapeletWeightArr.push(row[weightIndex][i][shapeletWeightIndex]);
             currentShapeletWeightArr.push(parseInt(row[weightIndex][i][shapeletWeightIndex]));
         }
@@ -1267,9 +1283,6 @@ function drawOneShapeletAllDistanceHistogram(aShapeletSelection, aLabelSelection
         }
     });
 
-    console.log("labelSet:");
-    console.log(labelSet);
-
     var dataArr = [];
     dataArr.push(['Class 0', 'Class 1']);
     for (var i=0; i<labelDistanceArrMaxLength; i++){
@@ -1302,7 +1315,7 @@ function drawOneShapeletAllDistanceHistogram(aShapeletSelection, aLabelSelection
         dataArr
     );
 
-    var myTitle = '[Shapelet no. ' + aShapeletSelection + ' (label no. ' + aLabelSelection + ')]\n\nThe distance distribution of one shapelet to two classes of timeseries\n\n';
+    var myTitle = '[Shapelet no. ' + aShapeletSelection + ' (label no. ' + aLabelSelection + ')]\n\n';
 
     var options = {
         title: myTitle,
@@ -1339,6 +1352,8 @@ function drawOneShapeletAllDistanceHistogram(aShapeletSelection, aLabelSelection
     //   };
 
     // Instantiate and draw the chart.
-    var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+    var chart = new google.visualization.Histogram(document.getElementById('distanceHistogramChart'));
     chart.draw(data, options);
 }
+
+
